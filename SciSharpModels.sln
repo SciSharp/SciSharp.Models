@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SciSharp.Models.YOLOv3", "SciSharp.Models.YOLOv3\SciSharp.Models.YOLOv3.csproj", "{62D06627-EED6-4691-8B2F-9D7F885946E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models.Run", "Models.Run\Models.Run.csproj", "{58E51362-6512-4156-B4B6-A9A8FFAF39A8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tensorflow.Binding", "..\..\SciSharp\TensorFlow.NET\src\TensorFlowNET.Core\Tensorflow.Binding.csproj", "{E6C8DE37-9F15-43CB-9F5B-6B90069DE55A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{62D06627-EED6-4691-8B2F-9D7F885946E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62D06627-EED6-4691-8B2F-9D7F885946E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62D06627-EED6-4691-8B2F-9D7F885946E9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{62D06627-EED6-4691-8B2F-9D7F885946E9}.Debug|x64.Build.0 = Debug|Any CPU
+		{62D06627-EED6-4691-8B2F-9D7F885946E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62D06627-EED6-4691-8B2F-9D7F885946E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62D06627-EED6-4691-8B2F-9D7F885946E9}.Release|x64.ActiveCfg = Release|Any CPU
+		{62D06627-EED6-4691-8B2F-9D7F885946E9}.Release|x64.Build.0 = Release|Any CPU
+		{58E51362-6512-4156-B4B6-A9A8FFAF39A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58E51362-6512-4156-B4B6-A9A8FFAF39A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58E51362-6512-4156-B4B6-A9A8FFAF39A8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{58E51362-6512-4156-B4B6-A9A8FFAF39A8}.Debug|x64.Build.0 = Debug|Any CPU
+		{58E51362-6512-4156-B4B6-A9A8FFAF39A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58E51362-6512-4156-B4B6-A9A8FFAF39A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58E51362-6512-4156-B4B6-A9A8FFAF39A8}.Release|x64.ActiveCfg = Release|Any CPU
+		{58E51362-6512-4156-B4B6-A9A8FFAF39A8}.Release|x64.Build.0 = Release|Any CPU
+		{E6C8DE37-9F15-43CB-9F5B-6B90069DE55A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6C8DE37-9F15-43CB-9F5B-6B90069DE55A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6C8DE37-9F15-43CB-9F5B-6B90069DE55A}.Debug|x64.ActiveCfg = Debug|x64
+		{E6C8DE37-9F15-43CB-9F5B-6B90069DE55A}.Debug|x64.Build.0 = Debug|x64
+		{E6C8DE37-9F15-43CB-9F5B-6B90069DE55A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6C8DE37-9F15-43CB-9F5B-6B90069DE55A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6C8DE37-9F15-43CB-9F5B-6B90069DE55A}.Release|x64.ActiveCfg = Release|x64
+		{E6C8DE37-9F15-43CB-9F5B-6B90069DE55A}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {06479ACE-93F6-46C4-9563-169795BDEF5D}
+	EndGlobalSection
+EndGlobal
