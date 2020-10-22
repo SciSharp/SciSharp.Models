@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using static SharpCV.Binding;
 
-namespace TensorFlowNET.Examples.ImageProcessing.YOLO
+namespace SciSharp.Models.YOLOv3
 {
     public class Utils
     {

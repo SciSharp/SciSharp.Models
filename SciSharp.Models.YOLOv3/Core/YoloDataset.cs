@@ -10,9 +10,9 @@ using static Tensorflow.Binding;
 using static SharpCV.Binding;
 using SharpCV;
 
-namespace TensorFlowNET.Examples.ImageProcessing.YOLO
+namespace SciSharp.Models.YOLOv3
 {
-    public class Dataset : IEnumerable<(NDArray, (NDArray, NDArray)[])>
+    public class YoloDataset : IEnumerable<BatchFeedingImage>
     {
         string annot_path;
         int[] input_sizes;
@@ -34,7 +34,7 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
 
         public int Length => num_batchs;
 
-        public Dataset(string dataset_type, Config cfg)
+        public YoloDataset(string dataset_type, YoloConfig cfg)
         {
             annot_path = dataset_type == "train" ? cfg.TRAIN.ANNOT_PATH : cfg.TEST.ANNOT_PATH;
             input_sizes = dataset_type == "train" ? cfg.TRAIN.INPUT_SIZE : cfg.TEST.INPUT_SIZE;
@@ -93,7 +93,7 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
         {
             var label = range(3).Select(i => np.zeros(train_output_sizes[i], train_output_sizes[i], anchor_per_scale, 5 + num_classes)).ToArray();
             var bboxes_xywh = range(3).Select(x => np.zeros(max_bbox_per_scale, 4)).ToArray();
-            var bbox_count = np.zeros(3);
+            var bbox_count = np.zeros(new Shape(3), NPTypeCode.Int32);
 
             foreach(var bbox in bboxes.GetNDArrays())
             {
@@ -124,11 +124,16 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
                         var floors = np.floor(bbox_xywh_scaled[i, new Slice(0, 2)]).astype(np.int32);
                         var (xind, yind) = (floors.GetInt32(0), floors.GetInt32(1));
 
-                        var ndTmp = label[i][yind, xind][iou_mask];
-                        ndTmp[Slice.All] = 0;
-                        ndTmp[Slice.All, new Slice(0, 4)] = bbox_xywh;
-                        ndTmp[Slice.All, new Slice(4, 5)] = 1.0f;
-                        ndTmp[Slice.All, new Slice(5)] = smooth_onehot;
+                        // set value by mask
+                        foreach(var (mask_index, is_mask) in enumerate(iou_mask.Data<bool>()))
+                        {
+                            if (!is_mask) 
+                                continue;
+                            var sliced_label = label[i][yind, xind, mask_index];
+                            sliced_label[new Slice(0, 4)] = bbox_xywh;
+                            sliced_label[new Slice(4, 5)] = 1.0f;
+                            sliced_label[new Slice(5)] = smooth_onehot;
+                        }
 
                         var bbox_ind = (int)(bbox_count[i] % max_bbox_per_scale);
                         bboxes_xywh[i][bbox_ind, new Slice(0, 4)] = bbox_xywh;
@@ -186,23 +191,23 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
             return (image, bboxes);
         }
 
-        public IEnumerator<(NDArray, (NDArray, NDArray)[])> GetEnumerator()
+        public IEnumerator<BatchFeedingImage> GetEnumerator()
         {
             // tf.device("/cpu:0");
 
             train_input_size = train_input_sizes[new Random().Next(0, train_input_sizes.Length - 1)];
             train_output_sizes = train_input_size / strides;
-            var batch_image = np.zeros((batch_size, train_input_size, train_input_size, 3));
+            var batch_image = np.zeros((batch_size, train_input_size, train_input_size, 3), NPTypeCode.Float);
             var batch_label_sbbox = np.zeros((batch_size, train_output_sizes[0], train_output_sizes[0],
-                                          anchor_per_scale, 5 + num_classes));
+                                          anchor_per_scale, 5 + num_classes), NPTypeCode.Float);
             var batch_label_mbbox = np.zeros((batch_size, train_output_sizes[1], train_output_sizes[1],
-                                          anchor_per_scale, 5 + num_classes));
+                                          anchor_per_scale, 5 + num_classes), NPTypeCode.Float);
             var batch_label_lbbox = np.zeros((batch_size, train_output_sizes[2], train_output_sizes[2],
-                                          anchor_per_scale, 5 + num_classes));
+                                          anchor_per_scale, 5 + num_classes), NPTypeCode.Float);
 
-            var batch_sbboxes = np.zeros((batch_size, max_bbox_per_scale, 4));
-            var batch_mbboxes = np.zeros((batch_size, max_bbox_per_scale, 4));
-            var batch_lbboxes = np.zeros((batch_size, max_bbox_per_scale, 4));
+            var batch_sbboxes = np.zeros((batch_size, max_bbox_per_scale, 4), NPTypeCode.Float);
+            var batch_mbboxes = np.zeros((batch_size, max_bbox_per_scale, 4), NPTypeCode.Float);
+            var batch_lbboxes = np.zeros((batch_size, max_bbox_per_scale, 4), NPTypeCode.Float);
 
             int num = 0;
             while (batch_count < num_batchs)
@@ -226,12 +231,28 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
                     num += 1;
                 }
                 batch_count += 1;
-                yield return (batch_image, new[]
+                yield return new BatchFeedingImage
                 {
-                    (batch_label_sbbox, batch_sbboxes),
-                    (batch_label_mbbox, batch_mbboxes),
-                    (batch_label_lbbox, batch_lbboxes)
-                });
+                    Image = batch_image,
+                    Targets = new List<LabelBorderBox>
+                    {
+                        new LabelBorderBox
+                        {
+                            Label = batch_label_sbbox,
+                            BorderBox = batch_sbboxes
+                        },
+                            new LabelBorderBox
+                        {
+                            Label = batch_label_mbbox,
+                            BorderBox = batch_mbboxes
+                        },
+                            new LabelBorderBox
+                        {
+                            Label = batch_label_lbbox,
+                            BorderBox = batch_lbboxes
+                        }
+                    }
+                };
             }
 
             /*batch_count = 0;
@@ -242,7 +263,7 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
                 yield return (results[0], results.Length == 1 ? null : results[1]);
             }*/
 
-            yield return (null, null);
+            throw new NotImplementedException("");
         }
 
         IEnumerator IEnumerable.GetEnumerator()

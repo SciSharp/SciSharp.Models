@@ -8,9 +8,9 @@ using Tensorflow.Keras.ArgsDefinition;
 using Tensorflow.Keras.Layers;
 using static Tensorflow.Binding;
 
-namespace TensorFlowNET.Examples.ImageProcessing.YOLO
+namespace SciSharp.Models.YOLOv3
 {
-    class common
+    class Common
     {
         public static Tensor convolutional(Tensor input_layer, TensorShape filters_shape,
             bool downsample = false, bool activate = true,

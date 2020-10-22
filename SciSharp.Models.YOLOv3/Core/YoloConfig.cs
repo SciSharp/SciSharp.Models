@@ -3,22 +3,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace TensorFlowNET.Examples.ImageProcessing.YOLO
+namespace SciSharp.Models.YOLOv3
 {
-    public class Config
+    public class YoloConfig
     {
-        public YoloConfig YOLO;
+        public YoloModelConfig YOLO;
         public TrainConfig TRAIN;
         public TestConfig TEST;
 
-        public Config(string root)
+        public YoloConfig(string root)
         {
-            YOLO = new YoloConfig(root);
+            YOLO = new YoloModelConfig(root);
             TRAIN = new TrainConfig(root);
             TEST = new TestConfig(root);
         }
 
-        public class YoloConfig
+        public class YoloModelConfig
         {
             string _root;
 
@@ -32,7 +32,7 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
             public string ORIGINAL_WEIGHT;
             public string DEMO_WEIGHT;
 
-            public YoloConfig(string root)
+            public YoloModelConfig(string root)
             {
                 _root = root;
                 CLASSES = Path.Combine(_root, "data", "classes", "yymnist.names");

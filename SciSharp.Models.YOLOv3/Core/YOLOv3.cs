@@ -1,17 +1,18 @@
 ﻿using NumSharp;
-using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using Tensorflow;
 using static Tensorflow.Binding;
+using System.IO;
 
-namespace TensorFlowNET.Examples.ImageProcessing.YOLO
+namespace SciSharp.Models.YOLOv3
 {
     public class YOLOv3
     {
-        Config cfg;
-        Dictionary<int, string> classes;
-        int num_class;
+        YoloConfig cfg;
+        public Dictionary<int, string> Classes { get; set; }
+        int num_class => Classes.Count;
         int[] strides;
         NDArray anchors;
         int anchor_per_scale;
@@ -22,11 +23,10 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
         Tensor pred_mbbox;
         Tensor pred_lbbox;
 
-        public YOLOv3(Config cfg_)
+        public YOLOv3(YoloConfig cfg_)
         {
             cfg = cfg_;
-            classes = Utils.read_class_names(cfg.YOLO.CLASSES);
-            num_class = len(classes);
+            Classes = Utils.read_class_names(cfg.YOLO.CLASSES);
             strides = cfg.YOLO.STRIDES;
             anchors = Utils.get_anchors(cfg.YOLO.ANCHORS);
             anchor_per_scale = cfg.YOLO.ANCHOR_PER_SCALE;
@@ -36,48 +36,48 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
 
         public Tensor[] Apply(Tensor input_layer)
         {
-            var (route_1, route_2, conv) = backbone.darknet53(input_layer);
+            var (route_1, route_2, conv) = Backbone.darknet53(input_layer);
 
-            conv = common.convolutional(conv, (1, 1, 1024, 512));
-            conv = common.convolutional(conv, (3, 3, 512, 1024));
-            conv = common.convolutional(conv, (1, 1, 1024, 512));
-            conv = common.convolutional(conv, (3, 3, 512, 1024));
-            conv = common.convolutional(conv, (1, 1, 1024, 512));
+            conv = Common.convolutional(conv, (1, 1, 1024, 512));
+            conv = Common.convolutional(conv, (3, 3, 512, 1024));
+            conv = Common.convolutional(conv, (1, 1, 1024, 512));
+            conv = Common.convolutional(conv, (3, 3, 512, 1024));
+            conv = Common.convolutional(conv, (1, 1, 1024, 512));
 
-            var conv_lobj_branch = common.convolutional(conv, (3, 3, 512, 1024));
-            var conv_lbbox = common.convolutional(conv_lobj_branch, 
+            var conv_lobj_branch = Common.convolutional(conv, (3, 3, 512, 1024));
+            var conv_lbbox = Common.convolutional(conv_lobj_branch, 
                 (1, 1, 1024, 3 * (num_class + 5)), 
                 activate: false, bn: false);
 
-            conv = common.convolutional(conv, (1, 1, 512, 256));
-            conv = common.upsample(conv);
+            conv = Common.convolutional(conv, (1, 1, 512, 256));
+            conv = Common.upsample(conv);
 
             conv = tf.concat(new[] { conv, route_2 }, axis: -1);
 
-            conv = common.convolutional(conv, (1, 1, 768, 256));
-            conv = common.convolutional(conv, (3, 3, 256, 512));
-            conv = common.convolutional(conv, (1, 1, 512, 256));
-            conv = common.convolutional(conv, (3, 3, 256, 512));
-            conv = common.convolutional(conv, (1, 1, 512, 256));
+            conv = Common.convolutional(conv, (1, 1, 768, 256));
+            conv = Common.convolutional(conv, (3, 3, 256, 512));
+            conv = Common.convolutional(conv, (1, 1, 512, 256));
+            conv = Common.convolutional(conv, (3, 3, 256, 512));
+            conv = Common.convolutional(conv, (1, 1, 512, 256));
 
-            var conv_mobj_branch = common.convolutional(conv, (3, 3, 256, 512));
-            var conv_mbbox = common.convolutional(conv_mobj_branch, 
+            var conv_mobj_branch = Common.convolutional(conv, (3, 3, 256, 512));
+            var conv_mbbox = Common.convolutional(conv_mobj_branch, 
                 (1, 1, 512, 3 * (num_class + 5)),
                 activate: false, bn: false);
 
-            conv = common.convolutional(conv, (1, 1, 256, 128));
-            conv = common.upsample(conv);
+            conv = Common.convolutional(conv, (1, 1, 256, 128));
+            conv = Common.upsample(conv);
 
             conv = tf.concat(new[] { conv, route_1 }, axis: -1);
 
-            conv = common.convolutional(conv, (1, 1, 384, 128));
-            conv = common.convolutional(conv, (3, 3, 128, 256));
-            conv = common.convolutional(conv, (1, 1, 256, 128));
-            conv = common.convolutional(conv, (3, 3, 128, 256));
-            conv = common.convolutional(conv, (1, 1, 256, 128));
+            conv = Common.convolutional(conv, (1, 1, 384, 128));
+            conv = Common.convolutional(conv, (3, 3, 128, 256));
+            conv = Common.convolutional(conv, (1, 1, 256, 128));
+            conv = Common.convolutional(conv, (3, 3, 128, 256));
+            conv = Common.convolutional(conv, (1, 1, 256, 128));
 
-            var conv_sobj_branch = common.convolutional(conv, (3, 3, 128, 256));
-            var conv_sbbox = common.convolutional(conv_sobj_branch,
+            var conv_sobj_branch = Common.convolutional(conv, (3, 3, 128, 256));
+            var conv_sbbox = Common.convolutional(conv_sobj_branch,
                 (1, 1, 256, 3 * (num_class + 5)),
                 activate: false, bn: false);
 
@@ -116,36 +116,50 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
             return tf.concat(new[] { pred_xywh, pred_conf, pred_prob }, axis: -1);
         }
 
-        public (Tensor, Tensor, Tensor) compute_loss(Tensor label_sbbox, Tensor label_mbbox, Tensor label_lbbox,
-            Tensor true_sbbox, Tensor true_mbbox, Tensor true_lbbox)
+        public Tensor[] compute_loss(Tensor pred, Tensor conv, NDArray label, NDArray bboxes, int i = 0)
         {
-            Tensor giou_loss = null, conf_loss = null, prob_loss = null;
-            (Tensor, Tensor, Tensor) loss_sbbox = (null, null, null);
-            (Tensor, Tensor, Tensor) loss_mbbox = (null, null, null);
-            (Tensor, Tensor, Tensor) loss_lbbox = (null, null, null);
+            var conv_shape = tf.shape(conv).ToArray<int>();
+            var batch_size = conv_shape[0];
+            var output_size = conv_shape[1];
+            var input_size = tf.constant(strides[i] * output_size);
+            conv = tf.reshape(conv, (batch_size, output_size, output_size, 3, 5 + num_class));
 
-            tf_with(tf.name_scope("smaller_box_loss"), delegate
-            {
-                loss_sbbox = loss_layer(conv, pred_sbbox, label_sbbox, true_sbbox,
-                                         anchors: anchors[0], stride: strides[0]);
-            });
+            var conv_raw_conf = conv[Slice.All, Slice.All, Slice.All, Slice.All, new Slice(4, 5)];
+            var conv_raw_prob = conv[Slice.All, Slice.All, Slice.All, Slice.All, new Slice(5)];
 
-            tf_with(tf.name_scope("giou_loss"), delegate
-            {
-                giou_loss = loss_sbbox.Item1 + loss_mbbox.Item1 + loss_lbbox.Item1;
-            });
+            var pred_xywh = pred[Slice.All, Slice.All, Slice.All, Slice.All, new Slice(0, 4)];
+            var pred_conf = pred[Slice.All, Slice.All, Slice.All, Slice.All, new Slice(4, 5)];
 
-            tf_with(tf.name_scope("conf_loss"), delegate
-            {
-                conf_loss = loss_sbbox.Item2 + loss_mbbox.Item2 + loss_lbbox.Item2;
-            });
+            var label_xywh = label[Slice.All, Slice.All, Slice.All, Slice.All, new Slice(0, 4)];
+            var respond_bbox = label[Slice.All, Slice.All, Slice.All, Slice.All, new Slice(4, 5)];
+            var label_prob = label[Slice.All, Slice.All, Slice.All, Slice.All, new Slice(5)];
 
-            tf_with(tf.name_scope("prob_loss"), delegate
-            {
-                prob_loss = loss_sbbox.Item3 + loss_mbbox.Item3 + loss_lbbox.Item3;
-            });
+            var giou = tf.expand_dims(bbox_giou(pred_xywh, label_xywh), axis: -1);
+            input_size = tf.cast(input_size, tf.float32);
 
-            return (giou_loss, conf_loss, prob_loss);
+            var label_xywh_1 = label_xywh[Slice.All, Slice.All, Slice.All, Slice.All, new Slice(2, 3)] 
+                    * label_xywh[Slice.All, Slice.All, Slice.All, Slice.All, new Slice(3, 4)];
+            var bbox_loss_scale = 2.0 - 1.0 * label_xywh_1 / (input_size * input_size);
+            var giou_loss = respond_bbox * bbox_loss_scale * (1 - giou);
+
+            var iou = bbox_iou(pred_xywh[Slice.All, Slice.All, Slice.All, Slice.All, np.newaxis, Slice.All], bboxes[Slice.All, np.newaxis, np.newaxis, np.newaxis, Slice.All, Slice.All]);
+            var max_iou = tf.expand_dims(tf.reduce_max(iou, axis: -1), axis: -1);
+
+            var respond_bgd = (1.0 - respond_bbox) * tf.cast(max_iou < cfg.YOLO.IOU_LOSS_THRESH, tf.float32);
+
+            var conf_focal = tf.pow(respond_bbox - pred_conf, 2);
+
+            var sigmoid1 = tf.nn.sigmoid_cross_entropy_with_logits(labels: respond_bbox, logits: conv_raw_conf);
+            var sigmoid2 = tf.nn.sigmoid_cross_entropy_with_logits(labels: respond_bbox, logits: conv_raw_conf);
+            var conf_loss = conf_focal * (respond_bbox * sigmoid1 + respond_bgd * sigmoid2);
+
+            var prob_loss = respond_bbox * tf.nn.sigmoid_cross_entropy_with_logits(labels: label_prob, logits: conv_raw_prob);
+
+            giou_loss = tf.reduce_mean(tf.reduce_sum(giou_loss, axis: new[] { 1, 2, 3, 4 }));
+            conf_loss = tf.reduce_mean(tf.reduce_sum(conf_loss, axis: new[] { 1, 2, 3, 4 }));
+            prob_loss = tf.reduce_mean(tf.reduce_sum(prob_loss, axis: new[] { 1, 2, 3, 4 }));
+
+            return new[] { giou_loss, conf_loss, prob_loss };
         }
 
         public (Tensor, Tensor, Tensor) loss_layer(Tensor conv, Tensor pred, Tensor label, Tensor bboxes, NDArray anchors, int stride)
@@ -246,7 +260,7 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
             var left_up = tf.maximum(boxes1["...", ":2"], boxes2["...", ":2"]);
             var right_down = tf.minimum(boxes1["...", "2:"], boxes2["...", "2:"]);
 
-            var inter_section = tf.maximum(right_down - left_up, 0.0);
+            var inter_section = tf.maximum(right_down - left_up, 0.0f);
             var inter_area = inter_section["...", "0"] * inter_section["...", "1"];
             var union_area = boxes1_area + boxes2_area - inter_area;
             var iou = 1.0f * inter_area / union_area;
