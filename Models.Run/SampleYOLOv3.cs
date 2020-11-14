@@ -8,6 +8,7 @@ using System.Text;
 using Tensorflow;
 using Tensorflow.Keras.Engine;
 using static Tensorflow.Binding;
+using static Tensorflow.KerasApi;
 
 namespace TensorFlowNET.Examples.ImageProcessing.YOLO
 {
@@ -69,7 +70,7 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
 
         public void Train()
         {
-            input_tensor = tf.keras.layers.Input((416, 416, 3));
+            input_tensor = keras.layers.Input((416, 416, 3));
             
             var conv_tensors = yolo.Apply(input_tensor);
 
@@ -81,10 +82,11 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
                 output_tensors.append(pred_tensor);
             }
 
-            model = tf.keras.Model(input_tensor, output_tensors);
+            model = keras.Model(input_tensor, output_tensors);
+            // model.summary();
             // model.load_weights("./yolov3");
 
-            var optimizer = tf.keras.optimizers.Adam();
+            var optimizer = keras.optimizers.Adam();
             foreach (var epoch in range(cfg.TRAIN.EPOCHS))
             {
                 // tf.print('EPOCH %3d' % (epoch + 1))

@@ -6,10 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="SharpCV" Version="0.6.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\SciSharp\TensorFlow.NET\src\TensorFlowNET.Core\Tensorflow.Binding.csproj" />
+    <PackageReference Include="TensorFlow.Keras" Version="0.1.0" />
   </ItemGroup>
 
 </Project>

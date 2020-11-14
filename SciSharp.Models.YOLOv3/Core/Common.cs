@@ -7,6 +7,7 @@ using Tensorflow;
 using Tensorflow.Keras.ArgsDefinition;
 using Tensorflow.Keras.Layers;
 using static Tensorflow.Binding;
+using static Tensorflow.KerasApi;
 
 namespace SciSharp.Models.YOLOv3
 {
@@ -21,7 +22,7 @@ namespace SciSharp.Models.YOLOv3
 
             if (downsample)
             {
-                var zero_padding_2d = tf.keras.layers.ZeroPadding2D(new[,] { { 1, 0 }, { 1, 0 } });
+                var zero_padding_2d = keras.layers.ZeroPadding2D(new[,] { { 1, 0 }, { 1, 0 } });
                 input_layer = zero_padding_2d.Apply(input_layer);
                 strides = 2;
                 padding = "valid";
@@ -32,12 +33,12 @@ namespace SciSharp.Models.YOLOv3
                 padding = "same";
             }
 
-            var conv2d_layer = tf.keras.layers.Conv2D(filters_shape[-1],
+            var conv2d_layer = keras.layers.Conv2D(filters_shape[-1],
                 kernel_size: filters_shape[0],
                 strides: strides,
                 padding: padding,
                 use_bias: !bn,
-                kernel_regularizer: tf.keras.regularizers.l2(0.0005f),
+                kernel_regularizer: keras.regularizers.l2(0.0005f),
                 kernel_initializer: tf.random_normal_initializer(stddev: 0.01f),
                 bias_initializer: tf.constant_initializer(0f));
             var conv = conv2d_layer.Apply(input_layer);
