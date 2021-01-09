@@ -5,3 +5,6 @@
 .vs
 bin
 obj
+/SciSharp.Models.YOLOv3/data/dataset/train
+/SciSharp.Models.YOLOv3/data/dataset/test
+/SciSharp.Models.YOLOv3/data

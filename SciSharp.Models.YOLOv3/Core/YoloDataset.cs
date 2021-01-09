@@ -57,7 +57,9 @@ namespace SciSharp.Models.YOLOv3
 
         string[] load_annotations()
         {
-            return File.ReadAllLines(annot_path);
+            var annotations = File.ReadAllLines(annot_path);
+            var shuffled = tf.random_shuffle(tf.constant(annotations, dtype: tf.@string));
+            return shuffled.StringData();
         }
 
         private (NDArray, NDArray) parse_annotation(string annotation)

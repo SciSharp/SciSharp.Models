@@ -44,21 +44,21 @@ namespace SciSharp.Models.YOLOv3
             var conv = conv2d_layer.Apply(input_layer);
             if (bn)
             {
-                var batch_layer = new BatchNormalization(new BatchNormalizationArgs
-                {
-                });
+                var batch_layer = keras.layers.BatchNormalization();
                 conv = batch_layer.Apply(conv);
             }
 
             if (activate)
-                conv = tf.nn.leaky_relu(conv, alpha: 0.1f);
+                conv = keras.layers.LeakyReLU(alpha: 0.1f).Apply(conv);
 
             return conv;
         }
 
         public static Tensor upsample(Tensor input_layer)
         {
-            return tf.image.resize(input_layer, (input_layer.shape[1] * 2, input_layer.shape[2] * 2), method: "nearest");
+            // var image = tf.image.resize(input_layer, (input_layer.shape[1] * 2, input_layer.shape[2] * 2), method: "nearest");
+            return keras.layers.UpSampling2D(size: (2, 2), interpolation: "nearest")
+                .Apply(input_layer);
         }
 
         public static Tensor residual_block(Tensor input_layer, 
@@ -69,7 +69,7 @@ namespace SciSharp.Models.YOLOv3
             var conv = convolutional(input_layer, (1, 1, input_channel, filter_num1));
             conv = convolutional(conv, (3, 3, filter_num1, filter_num2));
 
-            var residual_output = short_cut + conv;
+            var residual_output = keras.layers.Add().Apply(new[] { short_cut, conv });
 
             return residual_output;
         }

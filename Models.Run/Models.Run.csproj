@@ -11,7 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\SciSharp\TensorFlow.Models\TensorFlow.Keras.Layers\TensorFlow.Keras.Layers.csproj" />
     <ProjectReference Include="..\SciSharp.Models.YOLOv3\SciSharp.Models.YOLOv3.csproj" />
+    <ProjectReference Include="..\SciSharp.Models.YOLOv4\SciSharp.Models.YOLOv4.csproj" />
   </ItemGroup>
 
 </Project>

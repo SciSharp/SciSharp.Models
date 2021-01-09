@@ -1,5 +1,4 @@
 ﻿using System;
-using TensorFlowNET.Examples.ImageProcessing.YOLO;
 
 namespace Models.Run
 {
@@ -9,6 +8,9 @@ namespace Models.Run
         {
             var yolo3 = new SampleYOLOv3();
             yolo3.Run();
+
+            // var transformer = new SampleTransformer();
+            // transformer.Run();
         }
     }
 }

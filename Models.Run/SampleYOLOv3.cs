@@ -7,10 +7,11 @@ using System.Linq;
 using System.Text;
 using Tensorflow;
 using Tensorflow.Keras.Engine;
+using Tensorflow.Keras.Optimizers;
 using static Tensorflow.Binding;
 using static Tensorflow.KerasApi;
 
-namespace TensorFlowNET.Examples.ImageProcessing.YOLO
+namespace Models.Run
 {
     /// <summary>
     /// Implementation of YOLO v3 object detector in Tensorflow
@@ -23,14 +24,15 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
 
         YoloConfig cfg;
 
+        OptimizerV2 optimizer;
         Tensor input_tensor;
+        IVariableV1 global_steps;
 
         Model model;
 
         public bool Run()
         {
             tf.enable_eager_execution();
-
             cfg = new YoloConfig("YOLOv3");
             yolo = new YOLOv3(cfg);
 
@@ -66,27 +68,22 @@ namespace TensorFlowNET.Examples.ImageProcessing.YOLO
             var total_loss = giou_loss + conf_loss + prob_loss;
 
             var gradients = tape.gradient(total_loss, model.trainable_variables);
+            optimizer.apply_gradients(zip(gradients, model.trainable_variables.Select(x => x as ResourceVariable)));
+            print($"=> STEP {global_steps.numpy()} giou_loss: {giou_loss.numpy()} conf_loss: {conf_loss.numpy()} prob_loss: {prob_loss.numpy()} total_loss: {total_loss.numpy()}");
+            global_steps.assign_add(1);
         }
 
         public void Train()
         {
+            global_steps = tf.Variable(1, trainable: false, dtype: tf.int64);
             input_tensor = keras.layers.Input((416, 416, 3));
-            
-            var conv_tensors = yolo.Apply(input_tensor);
-
-            var output_tensors = new List<Tensor>();
-            foreach (var (i, conv_tensor) in enumerate(conv_tensors))
-            {
-                var pred_tensor = yolo.Decode(conv_tensor, i);
-                output_tensors.append(conv_tensor);
-                output_tensors.append(pred_tensor);
-            }
+            var output_tensors = yolo.Apply(input_tensor);
 
             model = keras.Model(input_tensor, output_tensors);
-            // model.summary();
+            model.summary();
             // model.load_weights("./yolov3");
 
-            var optimizer = keras.optimizers.Adam();
+            optimizer = keras.optimizers.Adam();
             foreach (var epoch in range(cfg.TRAIN.EPOCHS))
             {
                 // tf.print('EPOCH %3d' % (epoch + 1))
