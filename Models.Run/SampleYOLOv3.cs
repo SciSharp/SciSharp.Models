@@ -10,6 +10,8 @@ using Tensorflow.Keras.Engine;
 using Tensorflow.Keras.Optimizers;
 using static Tensorflow.Binding;
 using static Tensorflow.KerasApi;
+using static SharpCV.Binding;
+using SharpCV;
 
 namespace Models.Run
 {
@@ -37,7 +39,9 @@ namespace Models.Run
             yolo = new YOLOv3(cfg);
 
             PrepareData();
-            Train();
+            BuildModel();
+            // Train();
+            Test();
 
             return true;
         }
@@ -73,22 +77,69 @@ namespace Models.Run
             global_steps.assign_add(1);
         }
 
-        public void Train()
+        public void BuildModel()
         {
-            global_steps = tf.Variable(1, trainable: false, dtype: tf.int64);
             input_tensor = keras.layers.Input((416, 416, 3));
             var output_tensors = yolo.Apply(input_tensor);
 
             model = keras.Model(input_tensor, output_tensors);
             model.summary();
-            // model.load_weights("./yolov3");
+        }
 
+        public void Train()
+        {
+            // download wights from https://drive.google.com/file/d/1J5N5Pqf1BG1sN_GWDzgViBcdK2757-tS/view?usp=sharing
+            model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
             optimizer = keras.optimizers.Adam();
+            global_steps = tf.Variable(1, trainable: false, dtype: tf.int64);
             foreach (var epoch in range(cfg.TRAIN.EPOCHS))
             {
                 // tf.print('EPOCH %3d' % (epoch + 1))
                 foreach (var dataset in trainset)
                     TrainStep(dataset.Image, dataset.Targets);
+            }
+        }
+
+        public void Test()
+        {
+            var mAP_dir = Path.Combine("mAP", "ground-truth");
+            Directory.CreateDirectory(mAP_dir);
+
+            // model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
+            var annotation_files = File.ReadAllLines(cfg.TEST.ANNOT_PATH);
+            foreach(var (num, line) in enumerate(annotation_files))
+            {
+                var annotation = line.Split(' ');
+                var image_path = annotation[0];
+                var image_name = image_path.Split('/').Last();
+                var image = cv2.imread(image_path);
+                image = cv2.cvtColor(image, ColorConversionCodes.COLOR_BGR2RGB);
+                var count = annotation.Skip(1).Count();
+                var bbox_data_gt = np.zeros((count, 5), np.int32);
+                foreach (var (i, box) in enumerate(annotation.Skip(1)))
+                {
+                    bbox_data_gt[i] = np.array(box.Split(',').Select(x => int.Parse(x)));
+                };
+                var (bboxes_gt, classes_gt) = (bbox_data_gt[":", ":4"], bbox_data_gt[":", "4"]);
+                
+                print($"=> ground truth of %s: {image_name}");
+
+                var bbox_mess_file = new List<string>();
+                foreach (var i in range(bboxes_gt.shape[0]))
+                {
+                    var class_name = yolo.Classes[classes_gt[i]];
+                    var bbox_mess = $"{class_name} {string.Join(" ", bboxes_gt[i].ToArray<int>())}";
+                    bbox_mess_file.Add(bbox_mess);
+                }
+
+                var ground_truth_path = Path.Combine(mAP_dir, $"{num}.txt");
+                File.WriteAllLines(ground_truth_path, bbox_mess_file);
+                print($"=> predict result of %s: {image_name}");
+                // Predict Process
+                var image_size = image.shape.Dimensions.Take(2).ToArray();
+                var image_data = SciSharp.Models.YOLOv3.Utils.image_preporcess(image, image_size).Item1;
+                image_data = image_data[np.newaxis, Slice.All];
+                var pred_bbox = model.predict(image_data);
             }
         }
 
