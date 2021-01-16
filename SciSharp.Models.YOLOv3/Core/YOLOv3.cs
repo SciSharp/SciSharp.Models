@@ -82,42 +82,27 @@ namespace SciSharp.Models.YOLOv3
                 (1, 1, 256, 3 * (num_class + 5)),
                 activate: false, bn: false);
 
-            var output_tensors = new List<Tensor>();
-
-            var pred_tensor = Decode(conv_sbbox, 0);
-            output_tensors.Add(conv_sbbox);
-            output_tensors.Add(pred_tensor);
-
-            pred_tensor = Decode(conv_mbbox, 1);
-            output_tensors.Add(conv_mbbox);
-            output_tensors.Add(pred_tensor);
-
-            pred_tensor = Decode(conv_lbbox, 2);
-            output_tensors.Add(conv_lbbox);
-            output_tensors.Add(pred_tensor);
-
-            return output_tensors.ToArray();
+            return new[] { conv_sbbox, conv_mbbox, conv_lbbox };
         }
 
         public Tensor Decode(Tensor conv_output, int i = 0)
         {
-            var conv_shape = conv_output.shape; // tf.shape(conv_output);
-            var batch_size = 4; // conv_shape[0];
+            var conv_shape = tf.shape(conv_output);
+            var batch_size = conv_shape[0];
             var output_size = conv_shape[1];
 
-            conv_output = keras.layers.Reshape((output_size, output_size, 3, 5 + num_class)).Apply(conv_output);
+            conv_output = tf.reshape(conv_output, new object[] { batch_size, output_size, output_size, 3, 5 + num_class });
 
             var conv_raw_dxdy = conv_output[":", ":", ":", ":", "0:2"];
             var conv_raw_dwdh = conv_output[":", ":", ":", ":", "2:4"];
             var conv_raw_conf = conv_output[":", ":", ":", ":", "4:5"];
             var conv_raw_prob = conv_output[":", ":", ":", ":", "5:"];
 
-            var range = tf.range(output_size, dtype: tf.int32);
-            var y = tf.tile(range[Slice.All, tf.newaxis], new[] { 1, output_size });
-            var x = tf.tile(range[tf.newaxis, Slice.All], new[] { output_size, 1 });
+            var y = tf.tile(tf.range(output_size, dtype: tf.int32)[Slice.All, tf.newaxis], new object[] { 1, output_size });
+            var x = tf.tile(tf.range(output_size, dtype: tf.int32)[tf.newaxis, Slice.All], new object[] { output_size, 1 });
 
             Tensor xy_grid = keras.layers.Concatenate(axis: -1).Apply(new[] { x[Slice.All, Slice.All, tf.newaxis], y[Slice.All, Slice.All, tf.newaxis] });
-            xy_grid = tf.tile(xy_grid[tf.newaxis, Slice.All, Slice.All, tf.newaxis, Slice.All], new[] { batch_size, 1, 1, 3, 1 });
+            xy_grid = tf.tile(xy_grid[tf.newaxis, Slice.All, Slice.All, tf.newaxis, Slice.All], new object[] { batch_size, 1, 1, 3, 1 });
             xy_grid = tf.cast(xy_grid, tf.float32);
 
             var pred_xy = (tf.sigmoid(conv_raw_dxdy) + xy_grid) * strides[i];
@@ -131,11 +116,11 @@ namespace SciSharp.Models.YOLOv3
 
         public Tensor[] compute_loss(Tensor pred, Tensor conv, NDArray label, NDArray bboxes, int i = 0)
         {
-            var conv_shape = tf.shape(conv).ToArray<int>();
+            var conv_shape = tf.shape(conv);
             var batch_size = conv_shape[0];
             var output_size = conv_shape[1];
-            var input_size = tf.constant(strides[i] * output_size);
-            conv = tf.reshape(conv, (batch_size, output_size, output_size, 3, 5 + num_class));
+            var input_size = strides[i] * output_size;
+            conv = tf.reshape(conv, new object[] { batch_size, output_size, output_size, 3, 5 + num_class });
 
             var conv_raw_conf = conv[Slice.All, Slice.All, Slice.All, Slice.All, new Slice(4, 5)];
             var conv_raw_prob = conv[Slice.All, Slice.All, Slice.All, Slice.All, new Slice(5)];
@@ -183,15 +168,29 @@ namespace SciSharp.Models.YOLOv3
 
         public Tensor bbox_giou(Tensor boxes1, Tensor boxes2)
         {
-            boxes1 = tf.concat(new[] { boxes1["...", ":2"] - boxes1["...", "2:"] * 0.5f,
-                            boxes1["...", ":2"] + boxes1["...", "2:"] * 0.5f}, axis: -1);
-            boxes2 = tf.concat(new[] { boxes2["...", ":2"] - boxes2["...", "2:"] * 0.5f,
-                            boxes2["...", ":2"] + boxes2["...", "2:"] * 0.5f}, axis: -1);
+            boxes1 = tf.concat(new[] 
+            {   
+                boxes1["...", ":2"] - boxes1["...", "2:"] * 0.5f,
+                boxes1["...", ":2"] + boxes1["...", "2:"] * 0.5f
+            }, axis: -1);
 
-            boxes1 = tf.concat(new[] { tf.minimum(boxes1["...", ":2"], boxes1["...", "2:"]),
-                            tf.maximum(boxes1["...", ":2"], boxes1["...", "2:"])}, axis: -1);
-            boxes2 = tf.concat(new[] { tf.minimum(boxes2["...", ":2"], boxes2["...", "2:"]),
-                            tf.maximum(boxes2["...", ":2"], boxes2["...", "2:"])}, axis: -1);
+            boxes2 = tf.concat(new[] 
+            { 
+                boxes2["...", ":2"] - boxes2["...", "2:"] * 0.5f,
+                boxes2["...", ":2"] + boxes2["...", "2:"] * 0.5f
+            }, axis: -1);
+
+            boxes1 = tf.concat(new[] 
+            { 
+                tf.minimum(boxes1["...", ":2"], boxes1["...", "2:"]),
+                tf.maximum(boxes1["...", ":2"], boxes1["...", "2:"])
+            }, axis: -1);
+
+            boxes2 = tf.concat(new[] 
+            { 
+                tf.minimum(boxes2["...", ":2"], boxes2["...", "2:"]),
+                tf.maximum(boxes2["...", ":2"], boxes2["...", "2:"])
+            }, axis: -1);
 
             var boxes1_area = (boxes1["...", "2"] - boxes1["...", "0"]) * (boxes1["...", "3"] - boxes1["...", "1"]);
             var boxes2_area = (boxes2["...", "2"] - boxes2["...", "0"]) * (boxes2["...", "3"] - boxes2["...", "1"]);
@@ -218,10 +217,16 @@ namespace SciSharp.Models.YOLOv3
             var boxes1_area = boxes1["...", "2"] * boxes1["...", "3"];
             var boxes2_area = boxes2["...", "2"] * boxes2["...", "3"];
 
-            boxes1 = tf.concat(new[] { boxes1["...", ":2"] - boxes1["...", "2:"] * 0.5,
-                            boxes1["...", ":2"] + boxes1["...", "2:"] * 0.5}, axis: -1);
-            boxes2 = tf.concat(new[] { boxes2["...", ":2"] - boxes2["...", "2:"] * 0.5,
-                            boxes2["...", ":2"] + boxes2["...", "2:"] * 0.5}, axis: -1);
+            boxes1 = tf.concat(new[]
+            {
+                boxes1["...", ":2"] - boxes1["...", "2:"] * 0.5,
+                boxes1["...", ":2"] + boxes1["...", "2:"] * 0.5
+            }, axis: -1);
+            boxes2 = tf.concat(new[] 
+            { 
+                boxes2["...", ":2"] - boxes2["...", "2:"] * 0.5,
+                boxes2["...", ":2"] + boxes2["...", "2:"] * 0.5
+            }, axis: -1);
 
             var left_up = tf.maximum(boxes1["...", ":2"], boxes2["...", ":2"]);
             var right_down = tf.minimum(boxes1["...", "2:"], boxes2["...", "2:"]);

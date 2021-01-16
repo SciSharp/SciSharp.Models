@@ -75,7 +75,7 @@ namespace SciSharp.Models.YOLOv3
             public int[] INPUT_SIZE = new int[] { 544 };
             public bool DATA_AUG = false;
             public bool WRITE_IMAGE = true;
-            public string WRITE_IMAGE_PATH;
+            public string DECTECTED_IMAGE_PATH;
             public string WEIGHT_FILE;
             public bool WRITE_IMAGE_SHOW_LABEL = true;
             public bool SHOW_LABEL = true;
@@ -83,12 +83,13 @@ namespace SciSharp.Models.YOLOv3
             public float SCORE_THRESHOLD = 0.3f;
             public float IOU_THRESHOLD = 0.45f;
             public string ANNOT_PATH;
-
+            
             public TestConfig(string root)
             {
-                _root = root;
+                _root = Path.GetFullPath(root);
                 ANNOT_PATH = Path.Combine(_root, "data", "dataset", "yymnist_test.txt");
-                WRITE_IMAGE_PATH = Path.Combine(_root, "data", "detection");
+                DECTECTED_IMAGE_PATH = Path.Combine(_root, "data", "detection");
+                Directory.CreateDirectory(DECTECTED_IMAGE_PATH);
                 WEIGHT_FILE = Path.Combine(_root, "checkpoint", "yolov3_test_loss=9.2099.ckpt-5");
             }
         }
