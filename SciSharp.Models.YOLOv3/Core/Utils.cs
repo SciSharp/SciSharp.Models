@@ -113,7 +113,7 @@ namespace SciSharp.Models.YOLOv3
             (coors, scores, classes) = (pred_coor[mask], scores[mask], classes[mask]);
 
             if (coors.size == 0)
-                return null;
+                return coors;
 
             return np.concatenate(new[]
             {

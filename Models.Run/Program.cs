@@ -11,6 +11,8 @@ namespace Models.Run
 
             // var transformer = new SampleTransformer();
             // transformer.Run();
+            Console.WriteLine("YOLOv3 is completed.");
+            Console.ReadLine();
         }
     }
 }

@@ -35,7 +35,8 @@ namespace Models.Run
 
         public bool Run()
         {
-            tf.enable_eager_execution();
+            // tf.enable_eager_execution();
+            // tf.debugging.set_log_device_placement(true);
             cfg = new YoloConfig("YOLOv3");
             yolo = new YOLOv3(cfg);
 
@@ -95,13 +96,17 @@ namespace Models.Run
 
             // download wights from https://drive.google.com/file/d/1J5N5Pqf1BG1sN_GWDzgViBcdK2757-tS/view?usp=sharing
             // model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
+            // model.load_weights("./YOLOv3/yolov3.h5");
             optimizer = keras.optimizers.Adam();
             global_steps = tf.Variable(1, trainable: false, dtype: tf.int64);
             foreach (var epoch in range(cfg.TRAIN.EPOCHS))
             {
                 print($"EPOCH {epoch + 1:D3}");
                 foreach (var dataset in trainset)
+                {
                     TrainStep(dataset.Image, dataset.Targets);
+                    // model.save_weights("./YOLOv3/yolov3.h5");
+                }
             }
         }
 
@@ -117,7 +122,8 @@ namespace Models.Run
                 bbox_tensors.Add(bbox_tensor);
             }
             model = keras.Model(input_layer, bbox_tensors);
-            model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
+            // model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
+            model.load_weights("./YOLOv3/yolov3.h5");
 
             var mAP_dir = Path.Combine("mAP", "ground-truth");
             Directory.CreateDirectory(mAP_dir);
@@ -161,10 +167,12 @@ namespace Models.Run
                 pred_bbox = pred_bbox.Select(x => tf.reshape(x, new object[] { -1, tf.shape(x)[-1] })).ToList();
                 var pred_bbox_concat = tf.concat(pred_bbox, axis: 0);
                 var bboxes = Utils.postprocess_boxes(pred_bbox_concat.numpy(), image_size, INPUT_SIZE, cfg.TEST.SCORE_THRESHOLD);
-                var best_box_results = Utils.nms(bboxes, cfg.TEST.IOU_THRESHOLD, method: "nms");
-
-                Utils.draw_bbox(image, best_box_results, yolo.Classes.Values.ToArray());
-                cv2.imwrite(Path.Combine(cfg.TEST.DECTECTED_IMAGE_PATH, Path.GetFileName(image_name)), image);
+                if(bboxes.size > 0)
+                {
+                    var best_box_results = Utils.nms(bboxes, cfg.TEST.IOU_THRESHOLD, method: "nms");
+                    Utils.draw_bbox(image, best_box_results, yolo.Classes.Values.ToArray());
+                    cv2.imwrite(Path.Combine(cfg.TEST.DECTECTED_IMAGE_PATH, Path.GetFileName(image_name)), image);
+                }
             }
         }
 
