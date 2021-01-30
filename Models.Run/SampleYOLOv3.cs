@@ -24,11 +24,13 @@ namespace Models.Run
     {
         YOLOv3 yolo;
         YoloDataset trainset, testset;
-
         YoloConfig cfg;
 
         OptimizerV2 optimizer;
         IVariableV1 global_steps;
+        int warmup_steps;
+        int total_steps;
+        Tensor lr_tensor;
 
         Model model;
         int INPUT_SIZE = 416;
@@ -52,7 +54,7 @@ namespace Models.Run
         /// </summary>
         /// <param name="image_data"></param>
         /// <param name="targets"></param>
-        void TrainStep(NDArray image_data, List<LabelBorderBox> targets)
+        Tensor TrainStep(NDArray image_data, List<LabelBorderBox> targets)
         {
             using var tape = tf.GradientTape();
             var pred_result = model.Apply(image_data, is_training: true);
@@ -74,8 +76,25 @@ namespace Models.Run
 
             var gradients = tape.gradient(total_loss, model.trainable_variables);
             optimizer.apply_gradients(zip(gradients, model.trainable_variables.Select(x => x as ResourceVariable)));
-            print($"=> STEP {global_steps.numpy()} giou_loss: {giou_loss.numpy()} conf_loss: {conf_loss.numpy()} prob_loss: {prob_loss.numpy()} total_loss: {total_loss.numpy()}");
+            float lr = optimizer.lr.numpy();
+            print($"=> STEP {global_steps.numpy():D4} lr:{lr} giou_loss: {giou_loss.numpy()} conf_loss: {conf_loss.numpy()} prob_loss: {prob_loss.numpy()} total_loss: {total_loss.numpy()}");
             global_steps.assign_add(1);
+
+            // update learning rate
+            int global_steps_int = global_steps.numpy();
+            if (global_steps_int < warmup_steps)
+            {
+                lr = global_steps_int / (warmup_steps + 0f) * cfg.TRAIN.LEARN_RATE_INIT;
+            }
+            else
+            {
+                lr = (cfg.TRAIN.LEARN_RATE_END + 0.5f * (cfg.TRAIN.LEARN_RATE_INIT - cfg.TRAIN.LEARN_RATE_END) * 
+                    (1 + tf.cos((global_steps_int - warmup_steps + 0f) / (total_steps - warmup_steps) * (float)np.pi))).numpy();
+            }
+            lr_tensor = tf.constant(lr);
+            optimizer.lr.assign(lr_tensor);
+
+            return total_loss;
         }
 
         public void Train()
@@ -95,17 +114,27 @@ namespace Models.Run
             model.summary();
 
             // download wights from https://drive.google.com/file/d/1J5N5Pqf1BG1sN_GWDzgViBcdK2757-tS/view?usp=sharing
-            // model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
+            var weights = model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
             // model.load_weights("./YOLOv3/yolov3.h5");
+
             optimizer = keras.optimizers.Adam();
-            global_steps = tf.Variable(1, trainable: false, dtype: tf.int64);
+            global_steps = tf.Variable(1, trainable: false);
+            int steps_per_epoch = trainset.Length;
+            total_steps = cfg.TRAIN.EPOCHS * steps_per_epoch;
+            warmup_steps = cfg.TRAIN.WARMUP_EPOCHS * steps_per_epoch;
+
+            float loss = -1;
             foreach (var epoch in range(cfg.TRAIN.EPOCHS))
             {
-                print($"EPOCH {epoch + 1:D3}");
+                print($"EPOCH {epoch + 1:D4}");
                 foreach (var dataset in trainset)
                 {
-                    TrainStep(dataset.Image, dataset.Targets);
-                    // model.save_weights("./YOLOv3/yolov3.h5");
+                    float current_loss = TrainStep(dataset.Image, dataset.Targets).numpy();
+                    if(loss == -1 || current_loss < loss)
+                    {
+                        loss = current_loss;
+                        model.save_weights($"./YOLOv3/yolov3.h5");
+                    }
                 }
             }
         }
@@ -122,8 +151,9 @@ namespace Models.Run
                 bbox_tensors.Add(bbox_tensor);
             }
             model = keras.Model(input_layer, bbox_tensors);
-            // model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
-            model.load_weights("./YOLOv3/yolov3.h5");
+
+            var weights = model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
+            // var weights = model.load_weights("./YOLOv3/yolov3.20.4110.h5");
 
             var mAP_dir = Path.Combine("mAP", "ground-truth");
             Directory.CreateDirectory(mAP_dir);

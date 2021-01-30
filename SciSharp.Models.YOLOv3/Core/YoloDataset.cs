@@ -78,12 +78,12 @@ namespace SciSharp.Models.YOLOv3
                         .ToArray()))
                 .ToArray());
             
-            /*if (data_aug)
+            if (data_aug)
             {
                 (image, bboxes) = random_horizontal_flip(image, bboxes);
                 (image, bboxes) = random_crop(image, bboxes);
                 (image, bboxes) = random_translate(image, bboxes);
-            }*/
+            }
             image = cv2.cvtColor(image, ColorConversionCodes.COLOR_BGR2RGB);
             var (image1, bboxes1) = Utils.image_preporcess(image, new[] { train_input_size, train_input_size }, bboxes);
             // cv2.imshow("ss", image);
@@ -180,6 +180,14 @@ namespace SciSharp.Models.YOLOv3
 
         private (Mat, NDArray) random_horizontal_flip(Mat image, NDArray bboxes)
         {
+            var rand = new Random();
+            if (rand.NextDouble() < 0.5)
+            {
+                var w = image.shape[1];
+                image = cv2.flip(image, FLIP_MODE.FLIP_HORIZONTAL_MODE);
+                (bboxes[":", 0], bboxes[":", 2]) = (w - bboxes[":", 2], w - bboxes[":", 0]);
+            }
+
             return (image, bboxes);
         }
 
@@ -195,7 +203,7 @@ namespace SciSharp.Models.YOLOv3
 
         public IEnumerator<BatchFeedingImage> GetEnumerator()
         {
-            // tf.device("/cpu:0");
+            tf.device("/cpu:0");
 
             train_input_size = train_input_sizes[new Random().Next(0, train_input_sizes.Length - 1)];
             train_output_sizes = train_input_size / strides;
@@ -257,15 +265,8 @@ namespace SciSharp.Models.YOLOv3
                 };
             }
 
-            /*batch_count = 0;
-            np.random.shuffle(annotations);
-
-            while (true)
-            {
-                yield return (results[0], results.Length == 1 ? null : results[1]);
-            }*/
-
-            throw new NotImplementedException("");
+            batch_count = 0;
+            annotations = tf.random_shuffle(tf.constant(annotations, dtype: tf.@string)).StringData();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

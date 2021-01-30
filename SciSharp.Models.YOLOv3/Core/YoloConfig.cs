@@ -50,11 +50,9 @@ namespace SciSharp.Models.YOLOv3
             // new int[] { 320, 352, 384, 416, 448, 480, 512, 544, 576, 608 };
             public int[] INPUT_SIZE = new int[] { 416 }; 
             public bool DATA_AUG = true;
-            public float LEARN_RATE_INIT = 1e-4f;
+            public float LEARN_RATE_INIT = 1e-3f;
             public float LEARN_RATE_END = 1e-6f;
             public int WARMUP_EPOCHS = 2;
-            public int FISRT_STAGE_EPOCHS = 20;
-            public int SECOND_STAGE_EPOCHS = 30;
             public int EPOCHS = 30;
             public string INITIAL_WEIGHT;
             public string ANNOT_PATH;
@@ -79,7 +77,6 @@ namespace SciSharp.Models.YOLOv3
             public string WEIGHT_FILE;
             public bool WRITE_IMAGE_SHOW_LABEL = true;
             public bool SHOW_LABEL = true;
-            public int SECOND_STAGE_EPOCHS = 30;
             public float SCORE_THRESHOLD = 0.3f;
             public float IOU_THRESHOLD = 0.45f;
             public string ANNOT_PATH;
