@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
+    <PackageReference Include="SharpCV" Version="0.7.0" />
+    <PackageReference Include="TensorFlow.Keras" Version="0.5.1" />
   </ItemGroup>
 
 </Project>

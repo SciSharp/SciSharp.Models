@@ -43,8 +43,8 @@ namespace Models.Run
             yolo = new YOLOv3(cfg);
 
             PrepareData();
-            // Train();
-            Test();
+            Train();
+            // Test();
 
             return true;
         }
@@ -57,7 +57,7 @@ namespace Models.Run
         Tensor TrainStep(NDArray image_data, List<LabelBorderBox> targets)
         {
             using var tape = tf.GradientTape();
-            var pred_result = model.Apply(image_data, is_training: true);
+            var pred_result = model.Apply(image_data, training: true);
             var giou_loss = tf.constant(0.0f);
             var conf_loss = tf.constant(0.0f);
             var prob_loss = tf.constant(0.0f);
@@ -114,8 +114,8 @@ namespace Models.Run
             model.summary();
 
             // download wights from https://drive.google.com/file/d/1J5N5Pqf1BG1sN_GWDzgViBcdK2757-tS/view?usp=sharing
-            var weights = model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
-            // model.load_weights("./YOLOv3/yolov3.h5");
+            // var weights = model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
+            model.load_weights("./YOLOv3/yolov3.mnist.h5");
 
             optimizer = keras.optimizers.Adam();
             global_steps = tf.Variable(1, trainable: false);
@@ -129,13 +129,9 @@ namespace Models.Run
                 print($"EPOCH {epoch + 1:D4}");
                 foreach (var dataset in trainset)
                 {
-                    float current_loss = TrainStep(dataset.Image, dataset.Targets).numpy();
-                    if(loss == -1 || current_loss < loss)
-                    {
-                        loss = current_loss;
-                        model.save_weights($"./YOLOv3/yolov3.h5");
-                    }
+                    loss = TrainStep(dataset.Image, dataset.Targets).numpy();
                 }
+                model.save_weights($"./YOLOv3/yolov3.{loss:F2}.h5");
             }
         }
 
@@ -152,8 +148,8 @@ namespace Models.Run
             }
             model = keras.Model(input_layer, bbox_tensors);
 
-            var weights = model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
-            // var weights = model.load_weights("./YOLOv3/yolov3.20.4110.h5");
+            // var weights = model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
+            model.load_weights("./YOLOv3/yolov3.mnist.h5");
 
             var mAP_dir = Path.Combine("mAP", "ground-truth");
             Directory.CreateDirectory(mAP_dir);
