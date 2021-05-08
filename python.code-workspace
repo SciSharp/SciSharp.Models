@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"path": "SciSharp.Models.TimeSeries\\time_series_py"
+		}
+	],
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Python: Current File",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder}/time_series.py",
+				"console": "integratedTerminal",
+				"cwd": "${workspaceFolder}",
+				"justMyCode": false
+			}
+		]
+	}
+}

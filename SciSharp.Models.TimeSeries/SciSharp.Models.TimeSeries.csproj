@@ -5,10 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="time_series_py\**" />
+    <EmbeddedResource Remove="time_series_py\**" />
+    <None Remove="time_series_py\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="time_series.ipynb" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Pandas.NET\src\Pandas.NET\Pandas.Net.csproj" />
     <ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
   </ItemGroup>
 

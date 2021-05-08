@@ -6,6 +6,9 @@ namespace Models.Run
     {
         static void Main(string[] args)
         {
+            var ts = new SampleTimeSeries();
+            ts.Run();
+
             var yolo3 = new SampleYOLOv3();
             yolo3.Run();
 

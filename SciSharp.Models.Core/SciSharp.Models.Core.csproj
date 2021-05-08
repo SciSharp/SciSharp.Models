@@ -9,4 +9,8 @@
     <PackageReference Include="TensorFlow.Keras" Version="0.5.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\TensorFlow.NET\src\TensorFlowNET.Keras\Tensorflow.Keras.csproj" />
+  </ItemGroup>
+
 </Project>
