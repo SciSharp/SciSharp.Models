@@ -1,7 +1,12 @@
 {
 	"folders": [
 		{
+			"name": "time_series",
 			"path": "SciSharp.Models.TimeSeries\\time_series_py"
+		},
+		{
+			"name": "audio_recognition",
+			"path": "SciSharp.Models.AudioRecognition\\audio_recognition_py"
 		}
 	],
 	"launch": {
@@ -11,9 +16,9 @@
 				"name": "Python: Current File",
 				"type": "python",
 				"request": "launch",
-				"program": "${workspaceFolder}/time_series.py",
+				"program": "${workspaceFolder:audio_recognition}/simple_audio.py",
 				"console": "integratedTerminal",
-				"cwd": "${workspaceFolder}",
+				"cwd": "${workspaceFolder:audio_recognition}",
 				"justMyCode": false
 			}
 		]

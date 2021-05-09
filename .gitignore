@@ -8,3 +8,4 @@ obj
 /SciSharp.Models.YOLOv3/data/dataset/train
 /SciSharp.Models.YOLOv3/data/dataset/test
 /SciSharp.Models.YOLOv3/data
+/SciSharp.Models.AudioRecognition/audio_recognition_py/data

@@ -6,6 +6,9 @@ namespace Models.Run
     {
         static void Main(string[] args)
         {
+            var ar = new SampleAudioRecognition();
+            ar.Run();
+
             var ts = new SampleTimeSeries();
             ts.Run();
 

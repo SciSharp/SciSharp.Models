@@ -15,13 +15,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SciSharp.Models.Transformer
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SciSharp.Models.TimeSeries", "SciSharp.Models.TimeSeries\SciSharp.Models.TimeSeries.csproj", "{2414D2B0-2771-4282-9739-C92B307D8657}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SciSharp.Models.Core", "SciSharp.Models.Core\SciSharp.Models.Core.csproj", "{B31E0826-3F80-41F2-B3BB-946BB327DD77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SciSharp.Models.Core", "SciSharp.Models.Core\SciSharp.Models.Core.csproj", "{B31E0826-3F80-41F2-B3BB-946BB327DD77}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pandas.Net", "..\Pandas.NET\src\Pandas.NET\Pandas.Net.csproj", "{FE0E132E-84D0-4B3B-B460-A2A3499739C9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tensorflow.Binding", "..\TensorFlow.NET\src\TensorFlowNET.Core\Tensorflow.Binding.csproj", "{31343971-C609-4EA5-B64F-E056628404D1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tensorflow.Keras", "..\TensorFlow.NET\src\TensorFlowNET.Keras\Tensorflow.Keras.csproj", "{64A38B1E-AAE1-417F-A16B-B0C71E9D1B5F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SciSharp.Models.AudioRecognition", "SciSharp.Models.AudioRecognition\SciSharp.Models.AudioRecognition.csproj", "{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -279,6 +281,30 @@ Global
 		{64A38B1E-AAE1-417F-A16B-B0C71E9D1B5F}.Release|x64.Build.0 = Release|x64
 		{64A38B1E-AAE1-417F-A16B-B0C71E9D1B5F}.Release|x86.ActiveCfg = Release|Any CPU
 		{64A38B1E-AAE1-417F-A16B-B0C71E9D1B5F}.Release|x86.Build.0 = Release|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug|x64.Build.0 = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug|x86.Build.0 = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug-Minimal|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug-Minimal|Any CPU.Build.0 = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug-Minimal|x64.ActiveCfg = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug-Minimal|x64.Build.0 = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug-Minimal|x86.ActiveCfg = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Debug-Minimal|x86.Build.0 = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Publish|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Publish|Any CPU.Build.0 = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Publish|x64.ActiveCfg = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Publish|x64.Build.0 = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Publish|x86.ActiveCfg = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Publish|x86.Build.0 = Debug|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Release|x64.ActiveCfg = Release|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Release|x64.Build.0 = Release|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Release|x86.ActiveCfg = Release|Any CPU
+		{4A694085-66F1-41B1-B5AA-0154EEF8FBAA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
