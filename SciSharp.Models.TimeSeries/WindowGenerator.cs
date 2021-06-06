@@ -81,7 +81,7 @@ namespace SciSharp.Models.TimeSeries
 
         DatasetV2 MakeDataset(DataFrame df)
         {
-            var data = tf.convert_to_tensor(pd.array<double, float>(df));
+            var data = tf.convert_to_tensor(pd.array<float, float>(df));
             var ds = keras.preprocessing.timeseries_dataset_from_array(data,
                 sequence_length: _total_window_size,
                 sequence_stride: 1,

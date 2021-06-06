@@ -14,6 +14,19 @@ from IPython import display
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 tf.config.run_functions_eagerly(True)
 
+model = tf.keras.models.load_model("simple_audio_model")
+
+model = tf.keras.Sequential([
+  tf.keras.layers.InputLayer(input_shape=(4,)),
+  tf.keras.layers.Dense(8)])
+model.compile(tf.optimizers.RMSprop(0.001), loss='mse')
+model.fit(np.zeros((10, 4)), np.ones((10, 8)))
+
+# layer = layers.experimental.preprocessing.Resizing(32, 32)
+# inputs = tf.random.uniform(shape=(10, 32, 32, 3))
+# outputs = layer(inputs)
+
+
 # Set seed for experiment reproducibility
 seed = 42
 tf.random.set_seed(seed)
@@ -117,6 +130,16 @@ def preprocess_dataset(files):
       get_spectrogram_and_label_id,  num_parallel_calls=AUTOTUNE)
   return output_ds
 
+
+sample_file = data_dir/'no/01bb6a2a_nohash_0.wav'
+sample_ds = preprocess_dataset([str(sample_file)])
+model = tf.keras.models.load_model("simple_audio_model")
+for spectrogram, label in sample_ds.batch(1):
+  prediction = model(spectrogram)
+  plt.bar(commands, tf.nn.softmax(prediction[0]))
+  plt.title(f'Predictions for "{commands[label[0]]}"')
+  plt.show()
+  
 train_ds = spectrogram_ds
 val_ds = preprocess_dataset(val_files)
 test_ds = preprocess_dataset(test_files)
@@ -166,6 +189,8 @@ history = model.fit(
     epochs=EPOCHS,
     callbacks=tf.keras.callbacks.EarlyStopping(verbose=1, patience=2),
 )
+
+model.save("simple_audio_model")
 
 metrics = history.history
 plt.plot(history.epoch, metrics['loss'], metrics['val_loss'])

@@ -8,10 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.4.0.20200915" />
-    <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.4.1" />
+    <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SciSharp.Models.TextClassification\SciSharp.Models.TextClassification.csproj" />
     <ProjectReference Include="..\SciSharp.Models.TimeSeries\SciSharp.Models.TimeSeries.csproj" />
     <ProjectReference Include="..\SciSharp.Models.YOLOv3\SciSharp.Models.YOLOv3.csproj" />
     <ProjectReference Include="..\SciSharp.Models.YOLOv4\SciSharp.Models.YOLOv4.csproj" />

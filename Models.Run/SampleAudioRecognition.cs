@@ -59,6 +59,11 @@ namespace Models.Run
             var spectrogram_ds = waveform_ds.map(get_spectrogram_and_label_id, num_parallel_calls: tf.data.AUTOTUNE);
         }
 
+        public void LoadModel(string modelPath)
+        {
+            keras.models.load_model(modelPath);
+        }
+
         Tensors get_waveform_and_label(Tensors file_path)
         {
             var parts = tf.strings.split(file_path, sep: Path.DirectorySeparatorChar);

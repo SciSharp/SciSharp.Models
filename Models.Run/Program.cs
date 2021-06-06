@@ -6,8 +6,12 @@ namespace Models.Run
     {
         static void Main(string[] args)
         {
+            /*var tc = new SampleBinaryTextClassification();
+            tc.Run();
+
             var ar = new SampleAudioRecognition();
-            ar.Run();
+            ar.LoadModel("simple_audio_model");
+            ar.Run();*/
 
             var ts = new SampleTimeSeries();
             ts.Run();
