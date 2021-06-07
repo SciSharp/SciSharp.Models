@@ -7,6 +7,7 @@ using static Tensorflow.KerasApi;
 using static PandasNet.PandasApi;
 using System.IO;
 using SciSharp.Models.TimeSeries;
+using PandasNet;
 
 namespace Models.Run
 {
@@ -68,7 +69,7 @@ namespace Models.Run
             var column_indices = enumerate(df.columns).Select(x => new
             {
                 Index = x.Item1,
-                x.Item2.Name
+                Name = x.Item2.Name
             }).ToArray();
 
             var n = df.shape[0];
@@ -84,7 +85,7 @@ namespace Models.Run
             train_df = (train_df - train_mean) / train_std;
             val_df = (val_df - train_mean) / train_std;
             test_df = (test_df - train_mean) / train_std;
-
+            /*
             var w1 = new WindowGenerator(input_width: 24, label_width: 1, shift: 24,
                 train_df: train_df, val_df: val_df, test_df: test_df,
                 label_columns: new[] { "T (degC)" });
@@ -103,13 +104,36 @@ namespace Models.Run
                 tf.constant(array3)
             });
 
-            var (example_inputs, example_labels) = w2.SplitWindow(example_window);
+            /*var (example_inputs, example_labels) = w2.SplitWindow(example_window);
             print("All shapes are: (batch, time, features)");
             print($"Window shape: {example_window.TensorShape}");
             print($"Inputs shape: {example_inputs.TensorShape}");
             print($"Labels shape: {example_labels.TensorShape}");
 
-            w2.GetTrainingDataset();
+            var train_data = w2.GetTrainingDataset();
+            foreach(var (data, label) in train_data.take(1))
+            {
+                print($"Inputs shape (batch, time, features): {data.TensorShape}");
+                print($"Labels shape (batch, time, features): {label.TensorShape}");
+            }
+            */
+            var single_step_window = new WindowGenerator(input_width: 1, label_width: 1, shift: 1,
+                train_df: train_df, val_df: val_df, test_df: test_df,
+                label_columns: new[] { "T (degC)" });
+
+            /*var train_data = single_step_window.GetTrainingDataset();
+            foreach (var (data, label) in train_data.take(1))
+            {
+                print($"Inputs shape (batch, time, features): {data.TensorShape}");
+                print($"Labels shape (batch, time, features): {label.TensorShape}");
+            }*/
+
+            var baseline = new Baseline(column_indices.First(x => x.Name == "T (degC)").Index);
+            baseline.compile(optimizer: "rmsprop", loss: "mse", metrics: new string[] { "mae" });
+
+            var val_data = single_step_window.GetValidationDataset();
+            //var val_performance_baseline =
+            baseline.evaluate(val_data);
         }
     }
 }

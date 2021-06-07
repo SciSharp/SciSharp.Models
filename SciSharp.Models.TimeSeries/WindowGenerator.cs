@@ -64,7 +64,7 @@ namespace SciSharp.Models.TimeSeries
                 .ToArray();
         }
 
-        public (Tensor, Tensor) SplitWindow(Tensor features)
+        public Tensors SplitWindow(Tensors features)
         {
             var inputs = features[":", _input_slice.ToString(), ":"];
             var labels = features[":", _labels_slice.ToString(), ":"];
@@ -76,10 +76,13 @@ namespace SciSharp.Models.TimeSeries
                     .ToArray(), axis: -1);
             }
 
+            inputs.set_shape((-1, _input_width, -1));
+            labels.set_shape((-1, _label_width, -1));
+
             return (inputs, labels);
         }
 
-        DatasetV2 MakeDataset(DataFrame df)
+        IDatasetV2 MakeDataset(DataFrame df)
         {
             var data = tf.convert_to_tensor(pd.array<float, float>(df));
             var ds = keras.preprocessing.timeseries_dataset_from_array(data,
@@ -87,11 +90,15 @@ namespace SciSharp.Models.TimeSeries
                 sequence_stride: 1,
                 shuffle: true,
                 batch_size: 32);
-            throw new NotImplementedException("");
+            ds = ds.map(SplitWindow);
+            return ds;
         }
 
-        public DatasetV2 GetTrainingDataset()
+        public IDatasetV2 GetTrainingDataset()
              => MakeDataset(_train_df);
+
+        public IDatasetV2 GetValidationDataset()
+            => MakeDataset(_val_df);
 
         public override string ToString()
         {
