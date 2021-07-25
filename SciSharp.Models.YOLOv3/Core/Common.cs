@@ -13,7 +13,7 @@ namespace SciSharp.Models.YOLOv3
 {
     class Common
     {
-        public static Tensor convolutional(Tensor input_layer, TensorShape filters_shape,
+        public static Tensor convolutional(Tensor input_layer, Shape filters_shape,
             bool downsample = false, bool activate = true,
             bool bn = true)
         {
@@ -33,8 +33,8 @@ namespace SciSharp.Models.YOLOv3
                 padding = "same";
             }
 
-            var conv2d_layer = keras.layers.Conv2D(filters_shape[-1],
-                kernel_size: filters_shape[0],
+            var conv2d_layer = keras.layers.Conv2D((int)filters_shape[-1],
+                kernel_size: (int)filters_shape[0],
                 strides: strides,
                 padding: padding,
                 use_bias: !bn,

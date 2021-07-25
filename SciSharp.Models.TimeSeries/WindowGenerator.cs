@@ -53,14 +53,14 @@ namespace SciSharp.Models.TimeSeries
 
             _input_slice = pd.slice(0, input_width);
             _input_indices = Enumerable.Range(0, _total_window_size)
-                .Skip(_input_slice.Start)
-                .Take(_input_slice.Stop.Value - _input_slice.Start)
+                .Skip((int)_input_slice.Start)
+                .Take(_input_slice.Stop.Value - (int)_input_slice.Start)
                 .ToArray();
 
             _label_start = _total_window_size - label_width;
             _labels_slice = pd.slice(_label_start);
             _label_indices = Enumerable.Range(0, _total_window_size)
-                .Skip(_labels_slice.Start)
+                .Skip((int)_labels_slice.Start)
                 .ToArray();
         }
 
@@ -76,8 +76,8 @@ namespace SciSharp.Models.TimeSeries
                     .ToArray(), axis: -1);
             }
 
-            inputs.set_shape((-1, _input_width, -1));
-            labels.set_shape((-1, _label_width, -1));
+            inputs.shape = (-1, _input_width, -1);
+            labels.shape = (-1, _label_width, -1);
 
             return (inputs, labels);
         }

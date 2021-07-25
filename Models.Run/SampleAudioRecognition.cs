@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using NumSharp;
 using Tensorflow;
+using Tensorflow.NumPy;
 using static Tensorflow.Binding;
 using static Tensorflow.KerasApi;
 
@@ -21,7 +20,6 @@ namespace Models.Run
             // Set seed for experiment reproducibility
             int seed = 42;
             tf.set_random_seed(seed);
-            np.random.seed(seed);
             var data_dir = Path.Combine("data", "mini_speech_commands");
             Directory.CreateDirectory(data_dir);
             keras.utils.get_file("mini_speech_commands.zip",

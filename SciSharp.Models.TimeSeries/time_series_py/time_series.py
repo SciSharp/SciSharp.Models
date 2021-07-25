@@ -9,10 +9,21 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import tensorflow as tf
+from tensorflow.python.data.experimental.ops import cardinality
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 mpl.rcParams['figure.figsize'] = (8, 6)
 mpl.rcParams['axes.grid'] = False
+
+tf.config.run_functions_eagerly(True)
+
+"""
+r = tf.data.Dataset.range(10)
+example = tf.constant([1,2,3])
+dataset = tf.data.Dataset.from_tensors(example).repeat()
+print(list(dataset.as_numpy_iterator()))
+cardinality = dataset.cardinality()
+"""
 
 zip_path = tf.keras.utils.get_file(
     origin='https://storage.googleapis.com/tensorflow/tf-keras-datasets/jena_climate_2009_2016.csv.zip',
@@ -124,6 +135,7 @@ class WindowGenerator():
         f'Label indices: {self.label_indices}',
         f'Label column name(s): {self.label_columns}'])
 
+"""
 w1 = WindowGenerator(input_width=24, label_width=1, shift=24,
                      label_columns=['T (degC)'])
 print(w1)
@@ -131,6 +143,7 @@ print(w1)
 w2 = WindowGenerator(input_width=6, label_width=1, shift=1,
                      label_columns=['T (degC)'])
 print(w2)
+"""
 
 def split_window(self, features):
   inputs = features[:, self.input_slice, :]
@@ -150,9 +163,11 @@ def split_window(self, features):
 WindowGenerator.split_window = split_window
 
 # Stack three slices, the length of the total window:
+"""
 example_window = tf.stack([np.array(train_df[:w2.total_window_size]),
                            np.array(train_df[100:100+w2.total_window_size]),
                            np.array(train_df[200:200+w2.total_window_size])])
+
 
 
 example_inputs, example_labels = w2.split_window(example_window)
@@ -161,6 +176,7 @@ print('All shapes are: (batch, time, features)')
 print(f'Window shape: {example_window.shape}')
 print(f'Inputs shape: {example_inputs.shape}')
 print(f'labels shape: {example_labels.shape}')
+"""
 
 def make_dataset(self, data):
   data = np.array(data, dtype=np.float32)
@@ -169,11 +185,10 @@ def make_dataset(self, data):
       targets=None,
       sequence_length=self.total_window_size,
       sequence_stride=1,
-      shuffle=True,
+      shuffle=False,
       batch_size=32,)
 
   ds = ds.map(self.split_window)
-
   return ds
 
 WindowGenerator.make_dataset = make_dataset
@@ -206,8 +221,40 @@ WindowGenerator.val = val
 WindowGenerator.test = test
 WindowGenerator.example = example
 
+"""
 print(w2.train.element_spec)
 
 for example_inputs, example_labels in w2.train.take(1):
   print(f'Inputs shape (batch, time, features): {example_inputs.shape}')
   print(f'Labels shape (batch, time, features): {example_labels.shape}')
+"""
+
+single_step_window = WindowGenerator(
+    input_width=1, label_width=1, shift=1,
+    label_columns=['T (degC)'])
+"""
+for example_inputs, example_labels in single_step_window.train.take(1):
+  print(f'Inputs shape (batch, time, features): {example_inputs.shape}')
+  print(f'Labels shape (batch, time, features): {example_labels.shape}')
+"""
+class Baseline(tf.keras.Model):
+  def __init__(self, label_index=None):
+    super().__init__()
+    self.label_index = label_index
+
+  def call(self, inputs):
+    if self.label_index is None:
+      return inputs
+    result = inputs[:, :, self.label_index]
+    return result[:, :, tf.newaxis]
+
+baseline = Baseline(label_index=column_indices['T (degC)'])
+
+baseline.compile(loss=tf.losses.MeanSquaredError(),
+                 metrics=[tf.metrics.MeanAbsoluteError()])
+
+val_performance = {}
+performance = {}
+
+val_performance['Baseline'] = baseline.evaluate(single_step_window.val)
+performance['Baseline'] = baseline.evaluate(single_step_window.test, verbose=0)

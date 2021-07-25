@@ -1,11 +1,11 @@
-﻿using NumSharp;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using Tensorflow;
 using static Tensorflow.Binding;
 using static Tensorflow.KerasApi;
 using System.IO;
+using Tensorflow.NumPy;
 
 namespace SciSharp.Models.YOLOv3
 {

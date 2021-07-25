@@ -1,5 +1,4 @@
-﻿using NumSharp;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +8,7 @@ using Tensorflow;
 using static Tensorflow.Binding;
 using static SharpCV.Binding;
 using SharpCV;
+using Tensorflow.NumPy;
 
 namespace SciSharp.Models.YOLOv3
 {
@@ -45,7 +45,7 @@ namespace SciSharp.Models.YOLOv3
 
             classes = Utils.read_class_names(cfg.YOLO.CLASSES);
             num_classes = classes.Count;
-            anchors = np.array(Utils.get_anchors(cfg.YOLO.ANCHORS));
+            anchors = Utils.get_anchors(cfg.YOLO.ANCHORS);
             anchor_per_scale = cfg.YOLO.ANCHOR_PER_SCALE;
             max_bbox_per_scale = 150;
 
@@ -93,9 +93,9 @@ namespace SciSharp.Models.YOLOv3
 
         private(NDArray, NDArray, NDArray, NDArray, NDArray, NDArray) preprocess_true_boxes(NDArray bboxes)
         {
-            var label = range(3).Select(i => np.zeros(train_output_sizes[i], train_output_sizes[i], anchor_per_scale, 5 + num_classes)).ToArray();
-            var bboxes_xywh = range(3).Select(x => np.zeros(max_bbox_per_scale, 4)).ToArray();
-            var bbox_count = np.zeros(new Shape(3), NPTypeCode.Int32);
+            var label = range(3).Select(i => np.zeros((train_output_sizes[i], train_output_sizes[i], anchor_per_scale, 5 + num_classes))).ToArray();
+            var bboxes_xywh = range(3).Select(x => np.zeros((max_bbox_per_scale, 4))).ToArray();
+            var bbox_count = np.zeros(new Shape(3), np.int32);
 
             foreach(var bbox in bboxes.GetNDArrays())
             {
@@ -108,7 +108,11 @@ namespace SciSharp.Models.YOLOv3
                 var deta = 0.01f;
                 var smooth_onehot = onehot * (1 - deta) + deta * uniform_distribution;
 
-                var bbox_xywh = np.concatenate(((bbox_coor["2:"] + bbox_coor[":2"]) * 0.5, bbox_coor["2:"] - bbox_coor[":2"]), axis: -1);
+                var bbox_xywh = np.concatenate(new[]
+                {
+                    (bbox_coor["2:"] + bbox_coor[":2"]) * 0.5,
+                    bbox_coor["2:"] - bbox_coor[":2"]
+                }, axis: -1);
                 var bbox_xywh_scaled = 1.0 * bbox_xywh[np.newaxis, Slice.All] / strides[Slice.All, np.newaxis];
                 var iou = new List<NDArray>();
                 var exist_positive = false;
@@ -124,10 +128,10 @@ namespace SciSharp.Models.YOLOv3
                     if (np.any(iou_mask))
                     {
                         var floors = np.floor(bbox_xywh_scaled[i, new Slice(0, 2)]).astype(np.int32);
-                        var (xind, yind) = (floors.GetInt32(0), floors.GetInt32(1));
+                        (int xind, int yind) = (floors[0], floors[1]);
 
                         // set value by mask
-                        foreach(var (mask_index, is_mask) in enumerate(iou_mask.Data<bool>()))
+                        foreach(var (mask_index, is_mask) in enumerate(iou_mask.ToArray<bool>()))
                         {
                             if (!is_mask) 
                                 continue;
@@ -161,13 +165,17 @@ namespace SciSharp.Models.YOLOv3
             var boxes1_area = boxes1[Slice.Ellipsis, 2] * boxes1[Slice.Ellipsis, 3];
             var boxes2_area = boxes2[Slice.Ellipsis, 2] * boxes2[Slice.Ellipsis, 3];
 
-            boxes1 = np.concatenate((boxes1[Slice.Ellipsis, new Slice(":2")] - boxes1[Slice.Ellipsis, new Slice("2:")] * 0.5,
-                boxes1[Slice.Ellipsis, new Slice(":2")] + boxes1[Slice.Ellipsis, new Slice("2:")] * 0.5), 
-                axis: -1);
+            boxes1 = np.concatenate(new[]
+            {
+                boxes1[Slice.Ellipsis, new Slice(":2")] - boxes1[Slice.Ellipsis, new Slice("2:")] * 0.5,
+                boxes1[Slice.Ellipsis, new Slice(":2")] + boxes1[Slice.Ellipsis, new Slice("2:")] * 0.5
+            }, axis: -1);
 
-            boxes2 = np.concatenate((boxes2[Slice.Ellipsis, new Slice(":2")] - boxes2[Slice.Ellipsis, new Slice("2:")] * 0.5,
-                boxes2[Slice.Ellipsis, new Slice(":2")] + boxes2[Slice.Ellipsis, new Slice("2:")] * 0.5), 
-                axis: -1);
+            boxes2 = np.concatenate(new[]
+            {
+                boxes2[Slice.Ellipsis, new Slice(":2")] - boxes2[Slice.Ellipsis, new Slice("2:")] * 0.5,
+                boxes2[Slice.Ellipsis, new Slice(":2")] + boxes2[Slice.Ellipsis, new Slice("2:")] * 0.5
+            }, axis: -1);
 
             var left_up = np.maximum(boxes1[Slice.Ellipsis, new Slice(":2")], boxes2[Slice.Ellipsis, new Slice(":2")]);
             var right_down = np.minimum(boxes1[Slice.Ellipsis, new Slice("2:")], boxes2[Slice.Ellipsis, new Slice("2:")]);
@@ -207,17 +215,17 @@ namespace SciSharp.Models.YOLOv3
 
             train_input_size = train_input_sizes[new Random().Next(0, train_input_sizes.Length - 1)];
             train_output_sizes = train_input_size / strides;
-            var batch_image = np.zeros((batch_size, train_input_size, train_input_size, 3), NPTypeCode.Float);
+            var batch_image = np.zeros((batch_size, train_input_size, train_input_size, 3), np.float32);
             var batch_label_sbbox = np.zeros((batch_size, train_output_sizes[0], train_output_sizes[0],
-                                          anchor_per_scale, 5 + num_classes), NPTypeCode.Float);
+                                          anchor_per_scale, 5 + num_classes), np.float32);
             var batch_label_mbbox = np.zeros((batch_size, train_output_sizes[1], train_output_sizes[1],
-                                          anchor_per_scale, 5 + num_classes), NPTypeCode.Float);
+                                          anchor_per_scale, 5 + num_classes), np.float32);
             var batch_label_lbbox = np.zeros((batch_size, train_output_sizes[2], train_output_sizes[2],
-                                          anchor_per_scale, 5 + num_classes), NPTypeCode.Float);
+                                          anchor_per_scale, 5 + num_classes), np.float32);
 
-            var batch_sbboxes = np.zeros((batch_size, max_bbox_per_scale, 4), NPTypeCode.Float);
-            var batch_mbboxes = np.zeros((batch_size, max_bbox_per_scale, 4), NPTypeCode.Float);
-            var batch_lbboxes = np.zeros((batch_size, max_bbox_per_scale, 4), NPTypeCode.Float);
+            var batch_sbboxes = np.zeros((batch_size, max_bbox_per_scale, 4), np.float32);
+            var batch_mbboxes = np.zeros((batch_size, max_bbox_per_scale, 4), np.float32);
+            var batch_lbboxes = np.zeros((batch_size, max_bbox_per_scale, 4), np.float32);
 
             int num = 0;
             while (batch_count < num_batchs)

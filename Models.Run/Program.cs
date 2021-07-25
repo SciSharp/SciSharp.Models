@@ -16,8 +16,8 @@ namespace Models.Run
             var ts = new SampleTimeSeries();
             ts.Run();
 
-            var yolo3 = new SampleYOLOv3();
-            yolo3.Run();
+            //var yolo3 = new SampleYOLOv3();
+            //yolo3.Run();
 
             // var transformer = new SampleTransformer();
             // transformer.Run();

@@ -1,5 +1,4 @@
-﻿using NumSharp;
-using SciSharp.Models.YOLOv3;
+﻿using SciSharp.Models.YOLOv3;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +12,7 @@ using static Tensorflow.KerasApi;
 using static SharpCV.Binding;
 using SharpCV;
 using Utils = SciSharp.Models.YOLOv3.Utils;
+using Tensorflow.NumPy;
 
 namespace Models.Run
 {
@@ -166,14 +166,14 @@ namespace Models.Run
                 var bbox_data_gt = np.zeros((count, 5), np.int32);
                 foreach (var (i, box) in enumerate(annotation.Skip(1)))
                 {
-                    bbox_data_gt[i] = np.array(box.Split(',').Select(x => int.Parse(x)));
+                    bbox_data_gt[i] = np.array(box.Split(',').Select(x => int.Parse(x)).ToArray());
                 };
                 var (bboxes_gt, classes_gt) = (bbox_data_gt[":", ":4"], bbox_data_gt[":", "4"]);
                 
                 print($"=> ground truth of {image_name}:");
 
                 var bbox_mess_file = new List<string>();
-                foreach (var i in range(bboxes_gt.shape[0]))
+                foreach (var i in range((int)bboxes_gt.shape[0]))
                 {
                     var class_name = yolo.Classes[classes_gt[i]];
                     var bbox_mess = $"{class_name} {string.Join(" ", bboxes_gt[i].ToArray<int>())}";
@@ -185,7 +185,7 @@ namespace Models.Run
                 File.WriteAllLines(ground_truth_path, bbox_mess_file);
                 print($"=> predict result of {image_name}:");
                 // Predict Process
-                var image_size = image.shape.Dimensions.Take(2).ToArray();
+                var image_size = image.shape.as_int_list().Take(2).ToArray();
                 var image_data = Utils.image_preporcess(image, image_size).Item1;
 
                 image_data = image_data[np.newaxis, Slice.Ellipsis];

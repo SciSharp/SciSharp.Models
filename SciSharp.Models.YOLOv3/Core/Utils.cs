@@ -1,11 +1,11 @@
-﻿using NumSharp;
-using SharpCV;
+﻿using SharpCV;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Tensorflow;
+using Tensorflow.NumPy;
 using static SharpCV.Binding;
 using static Tensorflow.Binding;
 
@@ -25,7 +25,7 @@ namespace SciSharp.Models.YOLOv3
         {
             return np.array(File.ReadAllText(file).Split(',')
                 .Select(x => float.Parse(x))
-                .ToArray()).reshape(3, 3, 2);
+                .ToArray()).reshape((3, 3, 2));
         }
 
         public static (NDArray, NDArray) image_preporcess(Mat image, int[] target_size, NDArray gt_boxes = null)
@@ -67,7 +67,7 @@ namespace SciSharp.Models.YOLOv3
             }
         }
 
-        public static NDArray postprocess_boxes(NDArray pred_bbox, TensorShape org_img_shape, int input_size, float score_threshold)
+        public static NDArray postprocess_boxes(NDArray pred_bbox, Shape org_img_shape, int input_size, float score_threshold)
         {
             var valid_scale = np.array(0, np.inf).astype(np.float32);
             var pred_xywh = pred_bbox[Slice.All, new Slice(0, 4)];
@@ -126,7 +126,7 @@ namespace SciSharp.Models.YOLOv3
         public static Mat draw_bbox(Mat image, List<NDArray> bboxes, string[] classes, bool show_label = true)
         {
             var num_classes = len(classes);
-            var (image_h, image_w, _) = image.shape;
+            var (image_h, image_w) = image.shape;
             var hsv_tuples = range(num_classes).Select(x => (1.0f * x / num_classes, 1f, 1f)).ToArray();
             var colors = hsv_tuples.Select(x => 
             (
@@ -187,7 +187,7 @@ namespace SciSharp.Models.YOLOv3
         /// <returns></returns>
         public static List<NDArray> nms(NDArray bboxes, float iou_threshold, float sigma= 0.3f, string method = "nms")
         {
-            var classes_in_img = bboxes[Slice.All, 5].Data<float>()
+            var classes_in_img = bboxes[Slice.All, 5].ToArray<float>()
                 .Distinct()
                 .OrderBy(x => x)
                 .ToArray();
