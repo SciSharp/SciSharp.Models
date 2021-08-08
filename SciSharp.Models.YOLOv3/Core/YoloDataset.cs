@@ -74,7 +74,7 @@ namespace SciSharp.Models.YOLOv3
                 .Skip(1)
                 .Select(box => np.array(box
                         .Split(',')
-                        .Select(x => int.Parse(x))
+                        .Select(x => float.Parse(x))
                         .ToArray()))
                 .ToArray());
             
@@ -93,38 +93,38 @@ namespace SciSharp.Models.YOLOv3
 
         private(NDArray, NDArray, NDArray, NDArray, NDArray, NDArray) preprocess_true_boxes(NDArray bboxes)
         {
-            var label = range(3).Select(i => np.zeros((train_output_sizes[i], train_output_sizes[i], anchor_per_scale, 5 + num_classes))).ToArray();
-            var bboxes_xywh = range(3).Select(x => np.zeros((max_bbox_per_scale, 4))).ToArray();
+            var labels = range(3).Select(i => np.zeros((train_output_sizes[i], train_output_sizes[i], anchor_per_scale, 5 + num_classes), dtype: np.float32)).ToArray();
+            var bboxes_xywh = range(3).Select(x => np.zeros((max_bbox_per_scale, 4), dtype: np.float32)).ToArray();
             var bbox_count = np.zeros(new Shape(3), np.int32);
 
-            foreach(var bbox in bboxes.GetNDArrays())
+            foreach(var bbox in bboxes)
             {
                 var bbox_coor = bbox[":4"];
                 int bbox_class_ind = bbox[4];
 
                 var onehot = np.zeros(new Shape(num_classes), dtype: np.float32);
                 onehot[bbox_class_ind] = 1.0f;
-                var uniform_distribution = np.full(new Shape(num_classes), 1.0 / num_classes);
+                var uniform_distribution = np.full(new Shape(num_classes), 1.0f / num_classes);
                 var deta = 0.01f;
                 var smooth_onehot = onehot * (1 - deta) + deta * uniform_distribution;
 
                 var bbox_xywh = np.concatenate(new[]
                 {
-                    (bbox_coor["2:"] + bbox_coor[":2"]) * 0.5,
-                    bbox_coor["2:"] - bbox_coor[":2"]
+                    (bbox_coor["2:"] + bbox_coor[":2"]) * 0.5f,
+                    (bbox_coor["2:"] - bbox_coor[":2"]) * 1.0f
                 }, axis: -1);
-                var bbox_xywh_scaled = 1.0 * bbox_xywh[np.newaxis, Slice.All] / strides[Slice.All, np.newaxis];
+                var bbox_xywh_scaled = 1.0f * bbox_xywh[np.newaxis, Slice.All] / strides[Slice.All, np.newaxis];
                 var iou = new List<NDArray>();
                 var exist_positive = false;
                 foreach(var i in range(3))
                 {
-                    var anchors_xywh = np.zeros((anchor_per_scale, 4));
-                    anchors_xywh[Slice.All, new Slice(0, 2)] = np.floor(bbox_xywh_scaled[i, new Slice(0, 2)]).astype(np.int32) + 0.5;
+                    var anchors_xywh = np.zeros((anchor_per_scale, 4), dtype: np.float32);
+                    anchors_xywh[Slice.All, new Slice(0, 2)] = np.floor(bbox_xywh_scaled[i, new Slice(0, 2)]) + 0.5f;
                     anchors_xywh[Slice.All, new Slice(2, 4)] = anchors[i];
 
                     var iou_scale = bbox_iou(bbox_xywh_scaled[i][np.newaxis, Slice.All], anchors_xywh);
                     iou.Add(iou_scale);
-                    var iou_mask = iou_scale > 0.3;
+                    var iou_mask = iou_scale > 0.3f;
                     if (np.any(iou_mask))
                     {
                         var floors = np.floor(bbox_xywh_scaled[i, new Slice(0, 2)]).astype(np.int32);
@@ -135,13 +135,13 @@ namespace SciSharp.Models.YOLOv3
                         {
                             if (!is_mask) 
                                 continue;
-                            var sliced_label = label[i][yind, xind, mask_index];
-                            sliced_label[new Slice(0, 4)] = bbox_xywh;
-                            sliced_label[new Slice(4, 5)] = 1.0f;
-                            sliced_label[new Slice(5)] = smooth_onehot;
+                            var label = labels[i];
+                            label[yind, xind, mask_index, new Slice(0, 4)] = bbox_xywh;
+                            label[yind, xind, mask_index, new Slice(4, 5)] = 1.0f;
+                            label[yind, xind, mask_index, new Slice(5)] = smooth_onehot;
                         }
 
-                        var bbox_ind = (int)(bbox_count[i] % max_bbox_per_scale);
+                        int bbox_ind = bbox_count[i] % max_bbox_per_scale;
                         bboxes_xywh[i][bbox_ind, new Slice(0, 4)] = bbox_xywh;
                         bbox_count[i] += 1;
                         exist_positive = true;
@@ -154,7 +154,7 @@ namespace SciSharp.Models.YOLOv3
                 }
             }
 
-            var (label_sbbox, label_mbbox, label_lbbox) = (label[0], label[1], label[2]);
+            var (label_sbbox, label_mbbox, label_lbbox) = (labels[0], labels[1], labels[2]);
             var (sbboxes, mbboxes, lbboxes) = (bboxes_xywh[0], bboxes_xywh[1], bboxes_xywh[2]);
 
             return (label_sbbox, label_mbbox, label_lbbox, sbboxes, mbboxes, lbboxes);
@@ -167,14 +167,14 @@ namespace SciSharp.Models.YOLOv3
 
             boxes1 = np.concatenate(new[]
             {
-                boxes1[Slice.Ellipsis, new Slice(":2")] - boxes1[Slice.Ellipsis, new Slice("2:")] * 0.5,
-                boxes1[Slice.Ellipsis, new Slice(":2")] + boxes1[Slice.Ellipsis, new Slice("2:")] * 0.5
+                boxes1[Slice.Ellipsis, new Slice(":2")] - boxes1[Slice.Ellipsis, new Slice("2:")] * 0.5f,
+                boxes1[Slice.Ellipsis, new Slice(":2")] + boxes1[Slice.Ellipsis, new Slice("2:")] * 0.5f
             }, axis: -1);
 
             boxes2 = np.concatenate(new[]
             {
-                boxes2[Slice.Ellipsis, new Slice(":2")] - boxes2[Slice.Ellipsis, new Slice("2:")] * 0.5,
-                boxes2[Slice.Ellipsis, new Slice(":2")] + boxes2[Slice.Ellipsis, new Slice("2:")] * 0.5
+                boxes2[Slice.Ellipsis, new Slice(":2")] - boxes2[Slice.Ellipsis, new Slice("2:")] * 0.5f,
+                boxes2[Slice.Ellipsis, new Slice(":2")] + boxes2[Slice.Ellipsis, new Slice("2:")] * 0.5f
             }, axis: -1);
 
             var left_up = np.maximum(boxes1[Slice.Ellipsis, new Slice(":2")], boxes2[Slice.Ellipsis, new Slice(":2")]);
@@ -191,9 +191,9 @@ namespace SciSharp.Models.YOLOv3
             var rand = new Random();
             if (rand.NextDouble() < 0.5)
             {
-                var w = image.shape[1];
+                /*var w = image.shape[1];
                 image = cv2.flip(image, FLIP_MODE.FLIP_HORIZONTAL_MODE);
-                (bboxes[":", 0], bboxes[":", 2]) = (w - bboxes[":", 2], w - bboxes[":", 0]);
+                (bboxes[":", 0], bboxes[":", 2]) = (w - bboxes[":", 2], w - bboxes[":", 0]);*/
             }
 
             return (image, bboxes);

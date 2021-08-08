@@ -38,7 +38,7 @@ namespace SciSharp.Models.YOLOv3
             var scale = Math.Min(iw / (w + 0f), ih / (h + 0f));
             var (nw, nh) = (Convert.ToInt32(scale * w), Convert.ToInt32(scale * h));
 
-            NDArray image_resized = cv2.resize(dst, (nw, nh));
+            NDArray image_resized = cv2.resize(dst, (nw, nh)).astype(np.float32);
 
             var image_paded = np.full((ih, iw, 3), fill_value: 128.0f);
             var (dw, dh) = ((iw - nw) % 2, (ih - nh) % 2);
