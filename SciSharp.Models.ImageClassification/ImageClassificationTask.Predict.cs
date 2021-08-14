@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using static Tensorflow.Binding;
-using Tensorflow.Keras.Utils;
-using System.Linq;
-using System.Diagnostics;
 using Tensorflow;
 using Tensorflow.NumPy;
 using SciSharp.Models.Exceptions;
@@ -16,15 +13,15 @@ namespace SciSharp.Models.ImageClassification
     {
         public ModelPredictResult Predict(NDArray data)
         {
-            if (!File.Exists(output_graph))
+            if (!File.Exists(trainingOptions.ModelPath))
                 throw new FreezedGraphNotFoundException();
 
             if (labels == null)
-                labels = File.ReadAllLines(output_label_path);
+                labels = File.ReadAllLines(trainingOptions.LabelPath);
 
             // import graph and variables
             using var graph = new Graph();
-            graph.Import(output_graph, "");
+            graph.Import(trainingOptions.ModelPath);
             Tensor input = graph.OperationByName(input_tensor_name);
             Tensor output = graph.OperationByName(final_tensor_name);
 

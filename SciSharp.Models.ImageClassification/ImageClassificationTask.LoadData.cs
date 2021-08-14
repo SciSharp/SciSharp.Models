@@ -44,8 +44,8 @@ namespace SciSharp.Models.ImageClassification
 
                 var label_name = dir_name.ToLower();
                 result[label_name] = new Dictionary<string, string[]>();
-                int testing_count = (int)Math.Floor(file_list.Length * _options.TrainingOptions.TestingPercentage);
-                int validation_count = (int)Math.Floor(file_list.Length * _options.TrainingOptions.ValidationPercentage);
+                int testing_count = (int)Math.Floor(file_list.Length * trainingOptions.TestingPercentage);
+                int validation_count = (int)Math.Floor(file_list.Length * trainingOptions.ValidationPercentage);
                 result[label_name]["testing"] = file_list.Take(testing_count).ToArray();
                 result[label_name]["validation"] = file_list.Skip(testing_count).Take(validation_count).ToArray();
                 result[label_name]["training"] = file_list.Skip(testing_count + validation_count).ToArray();

@@ -18,23 +18,13 @@ namespace SciSharp.Models.ImageClassification
         {
             // Write out the trained graph and labels with the weights stored as
             // constants.
-            print($"Saving final result to: {output_graph}");
-            save_graph_to_file(output_graph, class_count);
-            File.WriteAllText(output_label_path, string.Join("\n", image_dataset.Keys));
-        }
-
-        /// <summary>
-        /// Saves an graph to file, creating a valid quantized one if necessary.
-        /// </summary>
-        /// <param name="graph_file_name"></param>
-        /// <param name="class_count"></param>
-        void save_graph_to_file(string graph_file_name, int class_count)
-        {
-            var (sess, _, _, _, _, _) = build_eval_session(class_count);
+            print($"Saving final result to: {trainingOptions.ModelPath}");
+            var (sess, _, _, _, _, _) = build_eval_session();
             var graph = sess.graph;
             var output_graph_def = tf.graph_util.convert_variables_to_constants(
                 sess, graph.as_graph_def(), new string[] { final_tensor_name });
-            File.WriteAllBytes(graph_file_name, output_graph_def.ToByteArray());
+            File.WriteAllBytes(trainingOptions.ModelPath, output_graph_def.ToByteArray());
+            File.WriteAllText(trainingOptions.LabelPath, string.Join("\n", image_dataset.Keys));
         }
     }
 }
