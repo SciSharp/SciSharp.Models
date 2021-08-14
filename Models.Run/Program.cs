@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SciSharp.Models;
+using System;
 
 namespace Models.Run
 {
@@ -6,6 +7,8 @@ namespace Models.Run
     {
         static void Main(string[] args)
         {
+            var mb = new ModelBuilder();
+            
             /*var tc = new SampleBinaryTextClassification();
             tc.Run();
 

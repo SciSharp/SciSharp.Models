@@ -7,7 +7,7 @@ using static Tensorflow.KerasApi;
 using static PandasNet.PandasApi;
 using System.IO;
 using SciSharp.Models.TimeSeries;
-using PandasNet;
+using Tensorflow;
 
 namespace Models.Run
 {
@@ -24,7 +24,7 @@ namespace Models.Run
                 extract: true);
 
             var df = pd.read_csv(Path.Combine(zip_path, "jena_climate_2009_2016.csv"));
-            df = df[5, 6];
+            df = df[new Slice(5, step: 6)];
             var date_time = pd.to_datetime(df.pop("Date Time"), "dd.MM.yyyy HH:mm:ss");
             print(df.head());
             print(df.describe().transpose());
@@ -74,9 +74,9 @@ namespace Models.Run
 
             var n = df.shape[0];
             var num_features = df.shape[1];
-            var train_df = df[pd.int32(n * 0.7)];
-            var val_df = df[pd.int32(n * 0.7), pd.int32(n * 0.9), 1];
-            var test_df = df[pd.int32(n * 0.9), 1];
+            var train_df = df[new Slice(0, pd.int32(n * 0.7))];
+            var val_df = df[new Slice(pd.int32(n * 0.7), pd.int32(n * 0.9))];
+            var test_df = df[new Slice(pd.int32(n * 0.9))];
 
             // Normalize the data
             var train_mean = train_df.mean();
@@ -85,7 +85,7 @@ namespace Models.Run
             train_df = (train_df - train_mean) / train_std;
             val_df = (val_df - train_mean) / train_std;
             test_df = (test_df - train_mean) / train_std;
-            /*
+            
             var w1 = new WindowGenerator(input_width: 24, label_width: 1, shift: 24,
                 train_df: train_df, val_df: val_df, test_df: test_df,
                 label_columns: new[] { "T (degC)" });
@@ -94,9 +94,9 @@ namespace Models.Run
                 train_df: train_df, val_df: val_df, test_df: test_df,
                 label_columns: new[] { "T (degC)" });
 
-            var array1 = pd.array<float>(train_df[w2.total_window_size]);
-            var array2 = pd.array<float>(train_df[100, 100 + w2.total_window_size, 1]);
-            var array3 = pd.array<float>(train_df[200, 200 + w2.total_window_size, 1]);
+            var array1 = pd.array<float>(train_df[new Slice(stop: w2.total_window_size)]);
+            var array2 = pd.array<float>(train_df[new Slice(100, 100 + w2.total_window_size)]);
+            var array3 = pd.array<float>(train_df[new Slice(200, 200 + w2.total_window_size)]);
             var example_window = tf.stack(new[]
             {
                 tf.constant(array1),
@@ -104,7 +104,7 @@ namespace Models.Run
                 tf.constant(array3)
             });
 
-            /*var (example_inputs, example_labels) = w2.SplitWindow(example_window);
+            var (example_inputs, example_labels) = w2.SplitWindow(example_window);
             print("All shapes are: (batch, time, features)");
             print($"Window shape: {example_window.TensorShape}");
             print($"Inputs shape: {example_inputs.TensorShape}");
@@ -116,24 +116,19 @@ namespace Models.Run
                 print($"Inputs shape (batch, time, features): {data.TensorShape}");
                 print($"Labels shape (batch, time, features): {label.TensorShape}");
             }
-            */
+            
             var single_step_window = new WindowGenerator(input_width: 1, label_width: 1, shift: 1,
                 train_df: train_df, val_df: val_df, test_df: test_df,
                 label_columns: new[] { "T (degC)" });
-
-            /*var train_data = single_step_window.GetTrainingDataset();
-            foreach (var (data, label) in train_data.take(1))
-            {
-                print($"Inputs shape (batch, time, features): {data.TensorShape}");
-                print($"Labels shape (batch, time, features): {label.TensorShape}");
-            }*/
 
             var baseline = new Baseline(column_indices.First(x => x.Name == "T (degC)").Index);
             baseline.compile(optimizer: "rmsprop", loss: "mse", metrics: new string[] { "mae" });
 
             var val_data = single_step_window.GetValidationDataset();
-            //var val_performance_baseline =
-            baseline.evaluate(val_data);
+            var val_performance_baseline = baseline.evaluate(val_data);
+
+            var test_data = single_step_window.GetTestDataset();
+            var performance_baseline = baseline.evaluate(test_data);
         }
     }
 }

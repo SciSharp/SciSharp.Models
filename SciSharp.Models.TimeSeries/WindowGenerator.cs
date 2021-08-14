@@ -100,6 +100,9 @@ namespace SciSharp.Models.TimeSeries
         public IDatasetV2 GetValidationDataset()
             => MakeDataset(_val_df);
 
+        public IDatasetV2 GetTestDataset()
+             => MakeDataset(_test_df);
+
         public override string ToString()
         {
             return $"Total window size: {_total_window_size}\r\n" +
