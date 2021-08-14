@@ -14,6 +14,15 @@ namespace SciSharp.Models.ImageClassification
 {
     public partial class ImageClassificationTask 
     {
+        public void SaveModel()
+        {
+            // Write out the trained graph and labels with the weights stored as
+            // constants.
+            print($"Saving final result to: {output_graph}");
+            save_graph_to_file(output_graph, class_count);
+            File.WriteAllText(output_label_path, string.Join("\n", image_dataset.Keys));
+        }
+
         /// <summary>
         /// Saves an graph to file, creating a valid quantized one if necessary.
         /// </summary>

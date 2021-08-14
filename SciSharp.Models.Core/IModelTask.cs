@@ -10,6 +10,7 @@ namespace SciSharp.Models
         void LoadData();
         void Train();
         ModelTestResult Test();
-        ModelPredictResult Predict();
+        void SaveModel();
+        ModelPredictResult Predict(NDArray data);
     }
 }

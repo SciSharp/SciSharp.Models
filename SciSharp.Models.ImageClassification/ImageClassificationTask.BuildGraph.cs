@@ -68,7 +68,7 @@ namespace SciSharp.Models.ImageClassification
                 IVariableV1 layer_weights = null;
                 tf_with(tf.name_scope("weights"), delegate
                 {
-                    var initial_value = tf.truncated_normal((bottleneck_tensor_size, (long)class_count), stddev: 0.001f);
+                    var initial_value = tf.truncated_normal((bottleneck_tensor_size, class_count), stddev: 0.001f);
                     layer_weights = tf.Variable(initial_value, name: "final_weights");
                     variable_summaries(layer_weights.AsTensor());
                 });

@@ -13,7 +13,7 @@ namespace SciSharp.Models.ImageClassification
         {
             // Look at the folder structure, and create lists of all the images.
             image_dataset = CreateDatasetFromDirectory();
-            var class_count = len(image_dataset);
+            class_count = len(image_dataset);
             if (class_count == 0)
                 print($"No valid folders of images found at {image_dir}");
             if (class_count == 1)

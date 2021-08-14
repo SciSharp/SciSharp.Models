@@ -102,7 +102,6 @@ namespace SciSharp.Models.ImageClassification
                     (float train_accuracy, float cross_entropy_value) = sess.run((evaluation_step, cross_entropy),
                         (bottleneck_input, train_bottlenecks),
                         (ground_truth_input, train_ground_truth));
-                    print($"{DateTime.Now}: Step {i + 1}: Train accuracy = {train_accuracy * 100}%,  Cross entropy = {cross_entropy_value.ToString("G4")}");
 
                     var (validation_bottlenecks, validation_ground_truth, _) = get_random_cached_bottlenecks(
                         sess, image_dataset, validation_batch_size, "validation",
@@ -117,7 +116,7 @@ namespace SciSharp.Models.ImageClassification
                         (ground_truth_input, validation_ground_truth));
 
                     // validation_writer.add_summary(validation_summary, i);
-                    print($"{DateTime.Now}: Step {i + 1}: Validation accuracy = {validation_accuracy * 100}% (N={len(validation_bottlenecks)}) {sw.ElapsedMilliseconds}ms");
+                    print($"{DateTime.Now}: Step {i + 1}: Train accuracy = {train_accuracy * 100}%, Cross entropy = {cross_entropy_value.ToString("G4")}, Validation accuracy = {validation_accuracy * 100}% (N={len(validation_bottlenecks)}) {sw.ElapsedMilliseconds}ms");
                     sw.Restart();
                 }
 
@@ -137,12 +136,6 @@ namespace SciSharp.Models.ImageClassification
             var (test_accuracy, predictions) = run_final_eval(sess, null, class_count, image_dataset,
                             jpeg_data_tensor, decoded_image_tensor, resized_image_tensor,
                             bottleneck_tensor);
-
-            // Write out the trained graph and labels with the weights stored as
-            // constants.
-            print($"Save final result to : {output_graph}");
-            save_graph_to_file(output_graph, class_count);
-            File.WriteAllText(output_label_path, string.Join("\n", image_dataset.Keys));
         }
 
         private (Tensor, Tensor) add_jpeg_decoding()
