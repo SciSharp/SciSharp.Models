@@ -13,10 +13,12 @@ namespace SciSharp.Models
             _context = new ModelContext();
         }
 
-        public IModelTask AddTask(IModelTask task)
+        public IImageClassificationTask AddImageClassificationTask<T>(TaskOptions options) 
+            where T : IImageClassificationTask, new()
         {
-            _context.Task = task;
-            return task;
+            _context.ImageClassificationTask = new T();
+            _context.ImageClassificationTask.Config(options);
+            return _context.ImageClassificationTask;
         }
     }
 }

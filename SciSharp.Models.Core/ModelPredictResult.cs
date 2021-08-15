@@ -7,7 +7,7 @@ namespace SciSharp.Models
 {
     public class ModelPredictResult
     {
-        public NDArray Predictions { get; set; }
-        public NDArray Probabilities { get; set; }
+        public string Label { get; set; }
+        public float Probability { get; set; }
     }
 }

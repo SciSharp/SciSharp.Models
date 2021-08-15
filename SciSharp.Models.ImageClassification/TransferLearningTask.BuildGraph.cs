@@ -11,7 +11,7 @@ using Tensorflow.NumPy;
 
 namespace SciSharp.Models.ImageClassification
 {
-    public partial class ImageClassificationTask 
+    public partial class TransferLearning 
     {
         bool wants_quantization;
 
@@ -24,7 +24,7 @@ namespace SciSharp.Models.ImageClassification
             // Add the new layer that we'll be training.
             (train_step, cross_entropy, bottleneck_input,
              ground_truth_input, final_tensor) = add_final_retrain_ops(
-                 class_count, final_tensor_name, bottleneck_tensor,
+                 len(image_dataset), final_tensor_name, bottleneck_tensor,
                  wants_quantization, is_training: true);
 
             return graph;
@@ -146,26 +146,5 @@ namespace SciSharp.Models.ImageClassification
         }
 
         Graph BuildGraph() => throw new NotImplementedException("");
-
-        NDArray ReadTensorFromImageFile(string file_name,
-                    int input_height = 299,
-                    int input_width = 299,
-                    int input_mean = 0,
-                    int input_std = 255)
-        {
-            var graph = tf.Graph().as_default();
-
-            var file_reader = tf.io.read_file(file_name, "file_reader");
-            var image_reader = tf.image.decode_jpeg(file_reader, channels: 3, name: "jpeg_reader");
-            var caster = tf.cast(image_reader, tf.float32);
-            var dims_expander = tf.expand_dims(caster, 0);
-            var resize = tf.constant(new int[] { input_height, input_width });
-            var bilinear = tf.image.resize_bilinear(dims_expander, resize);
-            var sub = tf.subtract(bilinear, new float[] { input_mean });
-            var normalized = tf.divide(sub, new float[] { input_std });
-
-            using (var sess = tf.Session(graph))
-                return sess.run(normalized);
-        }
     }
 }

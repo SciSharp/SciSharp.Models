@@ -5,6 +5,8 @@
     <LangVersion>9.0</LangVersion>
     <RootNamespace>SciSharp.Models</RootNamespace>
     <Version>0.1.0</Version>
+    <Authors>Haiping Chen</Authors>
+    <Company>SciSharp STACK</Company>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

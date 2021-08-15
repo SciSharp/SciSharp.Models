@@ -12,15 +12,17 @@ using SciSharp.Models.Exceptions;
 
 namespace SciSharp.Models.ImageClassification
 {
-    public partial class ImageClassificationTask 
+    public partial class TransferLearning 
     {
         public ModelTestResult Test()
         {
-            if (!File.Exists(trainingOptions.ModelPath))
+            if (!File.Exists(options.ModelPath))
                 throw new FreezedGraphNotFoundException();
 
-            using var graph = new Graph();
-            graph.Import(trainingOptions.ModelPath);
+            image_dataset = LoadDataFromDir(options.DataDir, testingPercentage: 1.0f, validationPercentage: 0);
+
+            using var graph = tf.Graph().as_default();
+            graph.Import(options.ModelPath);
             var (jpeg_data_tensor, decoded_image_tensor) = add_jpeg_decoding();
 
             using var sess = tf.Session(graph);
@@ -76,12 +78,12 @@ namespace SciSharp.Models.ImageClassification
             var eval_sess = tf.Session(graph);
             // Add the new layer for exporting.
             var (_, _, bottleneck_input, ground_truth_input, final_tensor) =
-                add_final_retrain_ops(class_count, final_tensor_name, bottleneck_tensor,
+                add_final_retrain_ops(len(image_dataset), final_tensor_name, bottleneck_tensor,
                     wants_quantization, is_training: false);
 
             // Now we need to restore the values from the training graph to the eval
             // graph.
-            tf.train.Saver().restore(eval_sess, trainingOptions.CheckpointPath);
+            tf.train.Saver().restore(eval_sess, Path.Join(taskDir, "checkpoint"));
 
             var (evaluation_step, prediction) = add_evaluation_step(final_tensor,
                                                     ground_truth_input);

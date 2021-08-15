@@ -7,8 +7,6 @@ namespace Models.Run
     {
         static void Main(string[] args)
         {
-            var mb = new ModelBuilder();
-            
             /*var tc = new SampleBinaryTextClassification();
             tc.Run();
 

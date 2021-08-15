@@ -10,7 +10,7 @@ using Tensorflow.NumPy;
 
 namespace SciSharp.Models.ImageClassification
 {
-    public partial class ImageClassificationTask 
+    public partial class TransferLearning 
     {
         Dictionary<string, Dictionary<string, string[]>> image_dataset;
         Tensor resized_image_tensor;
@@ -35,18 +35,15 @@ namespace SciSharp.Models.ImageClassification
         int test_batch_size = -1;
         int validation_batch_size = 100;
         int intermediate_store_frequency = 0;
-        int class_count = 0;
         const int MAX_NUM_IMAGES_PER_CLASS = 134217727;
 
         public void Train(TrainingOptions options)
         {
             trainingOptions = options;
-            trainingOptions.ModelPath = trainingOptions.ModelPath ?? Path.Join(taskDir, "saved_model.pb");
-            trainingOptions.CheckpointPath = trainingOptions.CheckpointPath ?? Path.Join(taskDir, "checkpoint");
-            trainingOptions.LabelPath = trainingOptions.LabelPath ?? Path.Join(taskDir, "labels.txt");
 
-            image_dir = options.DataDir;
-            LoadData();
+            image_dataset = LoadDataFromDir(this.options.DataDir, 
+                testingPercentage: options.TestingPercentage,
+                validationPercentage: options.ValidationPercentage);
 
             var sw = new Stopwatch();
             using var graph = isImportingGraph ? ImportGraph() : BuildGraph();
@@ -77,7 +74,8 @@ namespace SciSharp.Models.ImageClassification
             // Create a train saver that is used to restore values into an eval graph
             // when exporting models.
             var train_saver = tf.train.Saver();
-            train_saver.save(sess, trainingOptions.CheckpointPath);
+            var checkpoint = Path.Join(taskDir, "checkpoint");
+            train_saver.save(sess, checkpoint);
 
             sw.Restart();
 
@@ -134,7 +132,10 @@ namespace SciSharp.Models.ImageClassification
             }
 
             // After training is complete, force one last save of the train checkpoint.
-            train_saver.save(sess, trainingOptions.CheckpointPath);
+            print($"Saving checkpoint to {checkpoint}");
+            train_saver.save(sess, checkpoint);
+
+            SaveModel();
         }
 
         private (Tensor, Tensor) add_jpeg_decoding()

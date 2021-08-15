@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace SciSharp.Models.ImageClassification
 {
-    public partial class ImageClassificationTask : IModelTask 
+    public partial class TransferLearning : IImageClassificationTask 
     {
         string taskDir;
         string summaries_dir;
@@ -19,7 +19,7 @@ namespace SciSharp.Models.ImageClassification
         TrainingOptions trainingOptions;
         string[] labels;
         
-        public ImageClassificationTask()
+        public TransferLearning()
         {
             tf.compat.v1.disable_eager_execution();
             taskDir = Path.Combine(Directory.GetCurrentDirectory(), "image_classification_v1");
@@ -38,6 +38,13 @@ namespace SciSharp.Models.ImageClassification
             Directory.CreateDirectory(summaries_dir);
             bottleneck_dir = Path.Join(taskDir, "bottleneck");
             Directory.CreateDirectory(bottleneck_dir);
+        }
+
+        public void Config(TaskOptions options)
+        {
+            options.ModelPath = options.ModelPath ?? Path.Join(taskDir, "saved_model.pb");
+            options.LabelPath = options.LabelPath ?? Path.Join(taskDir, "labels.txt");
+            this.options = options;
         }
     }
 }

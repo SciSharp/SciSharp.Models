@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace SciSharp.Models.ImageClassification
 {
-    public partial class ImageClassificationTask 
+    public partial class TransferLearning 
     {
         /// <summary>
         /// Ensures all the training, testing, and validation bottlenecks are cached.
@@ -152,7 +152,7 @@ namespace SciSharp.Models.ImageClassification
             float[,] bottlenecks;
             var ground_truths = new List<long>();
             var filenames = new List<string>();
-            class_count = image_lists.Keys.Count;
+            var class_count = image_lists.Keys.Count;
             if (how_many >= 0)
             {
                 bottlenecks = new float[how_many, 2048];
