@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Tensorflow.NumPy;
 
 namespace SciSharp.Models
 {
     public class TrainingOptions
     {
-        public float TestingPercentage { get; set; } = 0.2f;
-        public float ValidationPercentage { get; set; } = 0.1f;
-
+        /// <summary>
+        /// Training data
+        /// </summary>
+        public NDArray Data { get; set; }
         public TrainingOptions()
         {
 

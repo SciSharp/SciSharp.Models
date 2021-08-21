@@ -55,7 +55,7 @@ namespace SciSharp.Models.ImageClassification
             Tensor resized_image_tensor, Tensor bottleneck_tensor)
         {
             var (test_bottlenecks, test_ground_truth, test_filenames) = get_random_cached_bottlenecks(train_session, image_lists,
-                                    test_batch_size, "testing", bottleneck_dir, image_dir, jpeg_data_tensor,
+                                    test_batch_size, "testing", bottleneck_dir, jpeg_data_tensor,
                                     decoded_image_tensor, resized_image_tensor, bottleneck_tensor, tfhub_module);
 
             var (eval_session, _, bottleneck_input, ground_truth_input, evaluation_step,
@@ -83,7 +83,7 @@ namespace SciSharp.Models.ImageClassification
 
             // Now we need to restore the values from the training graph to the eval
             // graph.
-            tf.train.Saver().restore(eval_sess, Path.Join(taskDir, "checkpoint"));
+            tf.train.Saver().restore(eval_sess, Path.Combine(taskDir, "checkpoint"));
 
             var (evaluation_step, prediction) = add_evaluation_step(final_tensor,
                                                     ground_truth_input);

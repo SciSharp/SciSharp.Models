@@ -9,5 +9,8 @@ namespace SciSharp.Models
     {
         public string Label { get; set; }
         public float Probability { get; set; }
+
+        public override string ToString()
+            => $"{Label}: {Probability}";
     }
 }

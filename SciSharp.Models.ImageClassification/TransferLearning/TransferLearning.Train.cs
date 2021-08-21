@@ -39,11 +39,9 @@ namespace SciSharp.Models.ImageClassification
 
         public void Train(TrainingOptions options)
         {
-            trainingOptions = options;
-
             image_dataset = LoadDataFromDir(this.options.DataDir, 
-                testingPercentage: options.TestingPercentage,
-                validationPercentage: options.ValidationPercentage);
+                testingPercentage: this.options.TestingPercentage,
+                validationPercentage: this.options.ValidationPercentage);
 
             var sw = new Stopwatch();
             using var graph = isImportingGraph ? ImportGraph() : BuildGraph();
@@ -58,7 +56,7 @@ namespace SciSharp.Models.ImageClassification
 
             // We'll make sure we've calculated the 'bottleneck' image summaries and
             // cached them on disk.
-            cache_bottlenecks(sess, image_dataset, image_dir,
+            cache_bottlenecks(sess, image_dataset,
                     bottleneck_dir, jpeg_data_tensor,
                     decoded_image_tensor, resized_image_tensor,
                     bottleneck_tensor, tfhub_module);
@@ -74,7 +72,7 @@ namespace SciSharp.Models.ImageClassification
             // Create a train saver that is used to restore values into an eval graph
             // when exporting models.
             var train_saver = tf.train.Saver();
-            var checkpoint = Path.Join(taskDir, "checkpoint");
+            var checkpoint = Path.Combine(taskDir, "checkpoint");
             train_saver.save(sess, checkpoint);
 
             sw.Restart();
@@ -83,7 +81,7 @@ namespace SciSharp.Models.ImageClassification
             {
                 var (train_bottlenecks, train_ground_truth, _) = get_random_cached_bottlenecks(
                         sess, image_dataset, train_batch_size, "training",
-                        bottleneck_dir, image_dir, jpeg_data_tensor,
+                        bottleneck_dir, jpeg_data_tensor,
                         decoded_image_tensor, resized_image_tensor, bottleneck_tensor,
                         tfhub_module);
 
@@ -108,7 +106,7 @@ namespace SciSharp.Models.ImageClassification
 
                     var (validation_bottlenecks, validation_ground_truth, _) = get_random_cached_bottlenecks(
                         sess, image_dataset, validation_batch_size, "validation",
-                        bottleneck_dir, image_dir, jpeg_data_tensor,
+                        bottleneck_dir, jpeg_data_tensor,
                         decoded_image_tensor, resized_image_tensor, bottleneck_tensor,
                         tfhub_module);
 

@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using static Tensorflow.Binding;
-using Tensorflow.Keras.Utils;
 using System.Linq;
-using System.Diagnostics;
 using Tensorflow;
 using Tensorflow.NumPy;
-using System.Threading.Tasks;
 
 namespace SciSharp.Models.ImageClassification
 {
@@ -19,7 +16,6 @@ namespace SciSharp.Models.ImageClassification
         /// </summary>
         /// <param name="sess"></param>
         /// <param name="image_lists"></param>
-        /// <param name="image_dir"></param>
         /// <param name="bottleneck_dir"></param>
         /// <param name="jpeg_data_tensor"></param>
         /// <param name="decoded_image_tensor"></param>
@@ -27,7 +23,7 @@ namespace SciSharp.Models.ImageClassification
         /// <param name="bottleneck_tensor"></param>
         /// <param name="tfhub_module"></param>
         void cache_bottlenecks(Session sess, Dictionary<string, Dictionary<string, string[]>> image_lists,
-            string image_dir, string bottleneck_dir, Tensor jpeg_data_tensor, Tensor decoded_image_tensor,
+            string bottleneck_dir, Tensor jpeg_data_tensor, Tensor decoded_image_tensor,
             Tensor resized_input_tensor, Tensor bottleneck_tensor, string module_name)
         {
             int how_many_bottlenecks = 0;
@@ -35,8 +31,8 @@ namespace SciSharp.Models.ImageClassification
             var categories = new string[] { "training", "testing", "validation" };
             for(var i = 0; i < kvs.Length; i++)
             {
-                var (label_name, label_lists) = kvs[i];
-                var sub_dir_path = Path.Join(bottleneck_dir, label_name);
+                var (label_name, label_lists) = (kvs[i].Key, kvs[i].Value);
+                var sub_dir_path = Path.Combine(bottleneck_dir, label_name);
                 Directory.CreateDirectory(sub_dir_path);
 
                 for(var j = 0; j < categories.Length; j++)
@@ -45,7 +41,7 @@ namespace SciSharp.Models.ImageClassification
                     var category_list = label_lists[category];
                     foreach (var (index, unused_base_name) in enumerate(category_list))
                     {
-                        get_or_create_bottleneck(sess, image_lists, label_name, index, image_dir, category,
+                        get_or_create_bottleneck(sess, image_lists, label_name, index, category,
                             bottleneck_dir, jpeg_data_tensor, decoded_image_tensor,
                             resized_input_tensor, bottleneck_tensor, module_name);
                         how_many_bottlenecks++;
@@ -57,16 +53,15 @@ namespace SciSharp.Models.ImageClassification
         }
 
         float[] get_or_create_bottleneck(Session sess, Dictionary<string, Dictionary<string, string[]>> image_lists,
-            string label_name, int index, string image_dir, string category, string bottleneck_dir,
+            string label_name, int index, string category, string bottleneck_dir,
             Tensor jpeg_data_tensor, Tensor decoded_image_tensor, Tensor resized_input_tensor,
             Tensor bottleneck_tensor, string module_name)
         {
             var label_lists = image_lists[label_name];
-            string bottleneck_path = get_bottleneck_path(image_lists, label_name, index,
-                                        bottleneck_dir, category, module_name);
+            string bottleneck_path = get_bottleneck_path(image_lists, label_name, bottleneck_dir, index, category, module_name);
             if (!File.Exists(bottleneck_path))
                 return create_bottleneck_file(bottleneck_path, image_lists, label_name, index,
-                                       image_dir, category, sess, jpeg_data_tensor,
+                                       category, sess, jpeg_data_tensor,
                                        decoded_image_tensor, resized_input_tensor,
                                        bottleneck_tensor);
             var bottleneck_string = File.ReadAllText(bottleneck_path);
@@ -75,12 +70,12 @@ namespace SciSharp.Models.ImageClassification
         }
 
         float[] create_bottleneck_file(string bottleneck_path, Dictionary<string, Dictionary<string, string[]>> image_lists,
-            string label_name, int index, string image_dir, string category, Session sess,
+            string label_name, int index, string category, Session sess,
             Tensor jpeg_data_tensor, Tensor decoded_image_tensor, Tensor resized_input_tensor, Tensor bottleneck_tensor)
         {
             // Create a single bottleneck file.
             print("Creating bottleneck at " + bottleneck_path);
-            var image_path = get_image_path(image_lists, label_name, index, image_dir, category);
+            var image_path = get_image_path(image_lists, label_name, options.DataDir, index, category);
             if (!File.Exists(image_path))
                 print($"File does not exist {image_path}");
 
@@ -116,7 +111,7 @@ namespace SciSharp.Models.ImageClassification
         }
 
         string get_image_path(Dictionary<string, Dictionary<string, string[]>> image_lists, string label_name,
-            int index, string image_dir, string category)
+            string image_dir, int index, string category)
         {
             if (!image_lists.ContainsKey(label_name))
                 print($"Label does not exist {label_name}");
@@ -131,21 +126,20 @@ namespace SciSharp.Models.ImageClassification
             var mod_index = index % len(category_list);
             var base_name = category_list[mod_index].Split(Path.DirectorySeparatorChar).Last();
             var sub_dir = label_name;
-            var full_path = Path.Join(image_dir, sub_dir, base_name);
+            var full_path = Path.Combine(image_dir, sub_dir, base_name);
             return full_path;
         }
 
-        string get_bottleneck_path(Dictionary<string, Dictionary<string, string[]>> image_lists, string label_name, int index,
-            string bottleneck_dir, string category, string module_name)
+        string get_bottleneck_path(Dictionary<string, Dictionary<string, string[]>> image_lists, string label_name,
+            string image_dir, int index, string category, string module_name)
         {
             module_name = (module_name.Replace("://", "~")  // URL scheme.
                  .Replace('/', '~')  // URL and Unix paths.
                  .Replace(':', '~').Replace('\\', '~'));  // Windows paths.
-            return get_image_path(image_lists, label_name, index, bottleneck_dir,
-                                  category) + "_" + module_name + ".txt";
+            return get_image_path(image_lists, label_name, image_dir, index, category) + "_" + module_name + ".txt";
         }
         (NDArray, long[], string[]) get_random_cached_bottlenecks(Session sess, Dictionary<string, Dictionary<string, string[]>> image_lists,
-            int how_many, string category, string bottleneck_dir, string image_dir,
+            int how_many, string category, string bottleneck_dir,
             Tensor jpeg_data_tensor, Tensor decoded_image_tensor, Tensor resized_input_tensor,
             Tensor bottleneck_tensor, string module_name)
         {
@@ -162,10 +156,9 @@ namespace SciSharp.Models.ImageClassification
                     int label_index = new Random().Next(class_count);
                     string label_name = image_lists.Keys.ToArray()[label_index];
                     int image_index = new Random().Next(MAX_NUM_IMAGES_PER_CLASS);
-                    string image_name = get_image_path(image_lists, label_name, image_index,
-                                      image_dir, category);
+                    string image_name = get_image_path(image_lists, label_name, bottleneck_dir, image_index, category);
                     var bottleneck = get_or_create_bottleneck(
-                      sess, image_lists, label_name, image_index, image_dir, category,
+                      sess, image_lists, label_name, image_index, category,
                       bottleneck_dir, jpeg_data_tensor, decoded_image_tensor,
                       resized_input_tensor, bottleneck_tensor, module_name);
                     for (int col = 0; col < bottleneck.Length; col++)
@@ -188,7 +181,7 @@ namespace SciSharp.Models.ImageClassification
                     foreach (var (image_index, image_name) in enumerate(image_lists[label_name][category]))
                     {
                         var bottleneck = get_or_create_bottleneck(
-                            sess, image_lists, label_name, image_index, image_dir, category,
+                            sess, image_lists, label_name, image_index, category,
                             bottleneck_dir, jpeg_data_tensor, decoded_image_tensor,
                             resized_input_tensor, bottleneck_tensor, module_name);
 

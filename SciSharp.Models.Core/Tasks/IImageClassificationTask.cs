@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Tensorflow.NumPy;
+using Tensorflow;
 
 namespace SciSharp.Models
 {
@@ -9,7 +9,7 @@ namespace SciSharp.Models
     {
         void Train(TrainingOptions options);
         ModelTestResult Test();
-        ModelPredictResult Predict(string imagePath);
+        ModelPredictResult Predict(Tensor input);
         void Config(TaskOptions options);
     }
 }
