@@ -14,8 +14,4 @@
     <None Remove="time_series.ipynb" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
-  </ItemGroup>
-
 </Project>

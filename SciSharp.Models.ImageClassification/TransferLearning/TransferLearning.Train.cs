@@ -18,8 +18,7 @@ namespace SciSharp.Models.ImageClassification
         string tfhub_module = "https://tfhub.dev/google/imagenet/inception_v3/feature_vector/3";
         Tensor final_tensor;
         Tensor ground_truth_input;
-        int how_many_training_steps = 100;
-        int train_batch_size = 100;
+
         Operation train_step;
         Tensor bottleneck_input;
         Tensor cross_entropy;
@@ -77,10 +76,10 @@ namespace SciSharp.Models.ImageClassification
 
             sw.Restart();
 
-            for (int i = 0; i < how_many_training_steps; i++)
+            for (int i = 0; i < options.TrainingSteps; i++)
             {
                 var (train_bottlenecks, train_ground_truth, _) = get_random_cached_bottlenecks(
-                        sess, image_dataset, train_batch_size, "training",
+                        sess, image_dataset, options.BatchSize, "training",
                         bottleneck_dir, jpeg_data_tensor,
                         decoded_image_tensor, resized_image_tensor, bottleneck_tensor,
                         tfhub_module);
@@ -97,7 +96,7 @@ namespace SciSharp.Models.ImageClassification
                 // train_writer.add_summary(train_summary, i);
 
                 // Every so often, print out how well the graph is training.
-                bool is_last_step = (i + 1 == how_many_training_steps);
+                bool is_last_step = (i + 1 == options.TrainingSteps);
                 if ((i % eval_step_interval) == 0 || is_last_step)
                 {
                     (float train_accuracy, float cross_entropy_value) = sess.run((evaluation_step, cross_entropy),
@@ -117,7 +116,7 @@ namespace SciSharp.Models.ImageClassification
                         (ground_truth_input, validation_ground_truth));
 
                     // validation_writer.add_summary(validation_summary, i);
-                    print($"Step {i + 1}: Training accuracy = {train_accuracy * 100}%, Cross entropy = {cross_entropy_value.ToString("G4")}, Validation accuracy = {validation_accuracy * 100}% (N={len(validation_bottlenecks)}) {sw.ElapsedMilliseconds}ms");
+                    print($"Step {i}: Training accuracy = {train_accuracy * 100}%, Cross entropy = {cross_entropy_value.ToString("G4")}, Validation accuracy = {validation_accuracy * 100}% (N={len(validation_bottlenecks)}) {sw.ElapsedMilliseconds}ms");
                     sw.Restart();
                 }
 

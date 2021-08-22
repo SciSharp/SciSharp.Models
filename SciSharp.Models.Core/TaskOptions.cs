@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Tensorflow;
 
 namespace SciSharp.Models
 {
@@ -12,6 +13,9 @@ namespace SciSharp.Models
         public string DataDir { get; set; }
         public float TestingPercentage { get; set; } = 0.2f;
         public float ValidationPercentage { get; set; } = 0.1f;
+        public Shape InputShape { get; set; }
+        public int NumberOfClass { get; set; }
+
         public TaskOptions()
         {
         }

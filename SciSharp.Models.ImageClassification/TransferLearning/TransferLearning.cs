@@ -51,5 +51,10 @@ namespace SciSharp.Models.ImageClassification
             options.LabelPath = options.LabelPath ?? Path.Combine(taskDir, "labels.txt");
             this.options = options;
         }
+
+        public void SetModelArgs<T>(T args)
+        {
+            
+        }
     }
 }

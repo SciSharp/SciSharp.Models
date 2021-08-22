@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Tensorflow;
 using Tensorflow.NumPy;
 
 namespace SciSharp.Models
@@ -10,7 +11,16 @@ namespace SciSharp.Models
         /// <summary>
         /// Training data
         /// </summary>
-        public NDArray Data { get; set; }
+        public FeatureAndLabel TrainingData { get; set; }
+        /// <summary>
+        /// Validation data
+        /// </summary>
+        public FeatureAndLabel ValidationData { get; set; }
+        public int Epochs { get; set; } = 5;
+        public int BatchSize { get; set; } = 100;
+        public int TrainingSteps { get; set; } = 100;
+        public float LearningRate { get; set; } = 0.1f;    
+
         public TrainingOptions()
         {
 
