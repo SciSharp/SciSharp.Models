@@ -14,4 +14,10 @@
     <None Remove="time_series.ipynb" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Pandas.NET\src\Pandas.NET\Pandas.Net.csproj" />
+    <ProjectReference Include="..\..\TensorFlow.NET\src\TensorFlowNET.Core\Tensorflow.Binding.csproj" />
+    <ProjectReference Include="..\..\TensorFlow.NET\src\TensorFlowNET.Keras\Tensorflow.Keras.csproj" />
+  </ItemGroup>
+
 </Project>
