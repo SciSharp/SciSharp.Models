@@ -8,21 +8,23 @@ namespace SciSharp.Models.ImageClassification
 {
     public partial class CNN
     {
-        Tensor x = null, y = null;
-        public Graph BuildGraph(TrainingOptions options)
+        public GraphBuiltResult BuildGraph(TrainingOptions options)
         {
-            var graph = new Graph().as_default();
+            var result = new GraphBuiltResult
+            {
+                Graph = new Graph().as_default()
+            };
 
             tf_with(tf.name_scope("Input"), delegate
             {
-                // Placeholders for inputs (x) and outputs(y)
+                // Placeholders for features (x) and lables(y)
                 var dims = new List<long>(_options.InputShape.dims);
                 dims.Insert(0, -1);
-                x = tf.placeholder(tf.float32, shape: new Shape(dims.ToArray()), name: "X");
-                y = tf.placeholder(tf.float32, shape: (-1, _options.NumberOfClass), name: "Y");
+                result.Features = tf.placeholder(tf.float32, shape: new Shape(dims.ToArray()), name: "X");
+                result.Labels = tf.placeholder(tf.float32, shape: (-1, _options.NumberOfClass), name: "Y");
             });
 
-            var conv1 = conv_layer(x, _convArgs.FilterSize1, _convArgs.NumberOfFilters1, _convArgs.Stride1, name: "conv1");
+            var conv1 = conv_layer(result.Features, _convArgs.FilterSize1, _convArgs.NumberOfFilters1, _convArgs.Stride1, name: "conv1");
             var pool1 = max_pool(conv1, ksize: 2, stride: 2, name: "pool1");
             var conv2 = conv_layer(pool1, _convArgs.FilterSize2, _convArgs.NumberOfFilters2, _convArgs.Stride2, name: "conv2");
             var pool2 = max_pool(conv2, ksize: 2, stride: 2, name: "pool2");
@@ -32,29 +34,25 @@ namespace SciSharp.Models.ImageClassification
 
             tf_with(tf.variable_scope("Train"), delegate
             {
-                tf_with(tf.variable_scope("Loss"), delegate
+                result.Loss = tf_with(tf.variable_scope("Loss"), x
+                    => tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels: result.Labels, 
+                        logits: output_logits), name: "loss"));
+
+                result.Optimizer = tf_with(tf.variable_scope("Optimizer"), x
+                    => tf.train.AdamOptimizer(learning_rate: options.LearningRate, name: "Adam-op")
+                        .minimize(result.Loss));
+
+                result.Accuracy = tf_with(tf.variable_scope("Accuracy"), delegate
                 {
-                    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels: y, logits: output_logits), name: "loss");
+                    var correct_prediction = tf.equal(tf.math.argmax(output_logits, 1), tf.math.argmax(result.Labels, 1), name: "correct_pred");
+                    return tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name: "accuracy");
                 });
 
-                tf_with(tf.variable_scope("Optimizer"), delegate
-                {
-                    optimizer = tf.train.AdamOptimizer(learning_rate: options.LearningRate, name: "Adam-op").minimize(loss);
-                });
-
-                tf_with(tf.variable_scope("Accuracy"), delegate
-                {
-                    var correct_prediction = tf.equal(tf.math.argmax(output_logits, 1), tf.math.argmax(y, 1), name: "correct_pred");
-                    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32), name: "accuracy");
-                });
-
-                tf_with(tf.variable_scope("Prediction"), delegate
-                {
-                    cls_prediction = tf.math.argmax(output_logits, axis: 1, name: "predictions");
-                });
+                result.Prediction = tf_with(tf.variable_scope("Prediction"), x
+                    => tf.math.argmax(output_logits, axis: 1, name: "predictions"));
             });
 
-            return graph;
+            return result;
         }
 
         /// <summary>

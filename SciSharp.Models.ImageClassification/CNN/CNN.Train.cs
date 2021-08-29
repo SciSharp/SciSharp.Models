@@ -10,12 +10,10 @@ namespace SciSharp.Models.ImageClassification
 {
     public partial class CNN
     {
-        Tensor loss, accuracy, cls_prediction;
-        Operation optimizer;
         public void Train(TrainingOptions options)
         {
-            var graph = BuildGraph(options);
-            using var sess = tf.Session(graph);
+            var graphBuiltResult = BuildGraph(options);
+            using var sess = tf.Session(graphBuiltResult.Graph);
 
             // Number of training iterations in each epoch
             var num_tr_iter = len(options.TrainingData.Features) / options.BatchSize;
@@ -44,31 +42,32 @@ namespace SciSharp.Models.ImageClassification
                     var (x_batch, y_batch) = GetNextBatch(x_train, y_train, start, end);
 
                     // Run optimization op (backprop)
-                    sess.run(optimizer, (x, x_batch), (y, y_batch));
+                    sess.run(graphBuiltResult.Optimizer, (graphBuiltResult.Features, x_batch), (graphBuiltResult.Labels, y_batch));
 
                     if (iteration % display_freq == 0)
                     {
                         // Calculate and display the batch loss and accuracy
-                        (loss_val, accuracy_val) = sess.run((loss, accuracy), new FeedItem(x, x_batch), new FeedItem(y, y_batch));
+                        (loss_val, accuracy_val) = sess.run((graphBuiltResult.Loss, graphBuiltResult.Accuracy), new FeedItem(graphBuiltResult.Features, x_batch), new FeedItem(graphBuiltResult.Labels, y_batch));
                         print($"iter {iteration.ToString("000")}: Loss={loss_val.ToString("0.0000")}, Training Accuracy={accuracy_val.ToString("P")} {sw.ElapsedMilliseconds}ms");
                         sw.Restart();
                     }
                 }
 
                 // Run validation after every epoch
-                (loss_val, accuracy_val) = sess.run((loss, accuracy), (x, x_valid), (y, y_valid));
+                (loss_val, accuracy_val) = sess.run((graphBuiltResult.Loss, graphBuiltResult.Accuracy), (graphBuiltResult.Features, x_valid), (graphBuiltResult.Labels, y_valid));
                 print("---------------------------------------------------------");
                 print($"Epoch: {epoch + 1}, validation loss: {loss_val.ToString("0.0000")}, validation accuracy: {accuracy_val.ToString("P")}");
+                SaveCheckpoint(sess);
                 print("---------------------------------------------------------");
             }
-
-            SaveCheckpoint(sess);
         }
 
         void SaveCheckpoint(Session sess)
         {
+            var checkpoint = Path.Combine(_taskDir, "checkpoint.ckpt");
+            print($"Saving checking point {checkpoint} ...");
             var saver = tf.train.Saver();
-            saver.save(sess, Path.Combine("", "mnist_cnn.ckpt"));
+            saver.save(sess, checkpoint);
         }
     }
 }
