@@ -33,7 +33,6 @@ namespace Models.Run
         Tensor lr_tensor;
 
         Model model;
-        int INPUT_SIZE = 416;
 
         public bool Run()
         {
@@ -115,7 +114,7 @@ namespace Models.Run
 
             // download wights from https://drive.google.com/file/d/1J5N5Pqf1BG1sN_GWDzgViBcdK2757-tS/view?usp=sharing
             // var weights = model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
-            model.load_weights("./YOLOv3/yolov3.mnist.h5");
+            model.load_weights("./YOLOv3/yolov3.h5");
 
             optimizer = keras.optimizers.Adam();
             global_steps = tf.Variable(1, trainable: false);
@@ -123,21 +122,26 @@ namespace Models.Run
             total_steps = cfg.TRAIN.EPOCHS * steps_per_epoch;
             warmup_steps = cfg.TRAIN.WARMUP_EPOCHS * steps_per_epoch;
 
-            float loss = -1;
+            float loss = 1000;
             foreach (var epoch in range(cfg.TRAIN.EPOCHS))
             {
                 print($"EPOCH {epoch + 1:D4}");
+                float current_loss = -1;
                 foreach (var dataset in trainset)
                 {
-                    loss = TrainStep(dataset.Image, dataset.Targets).numpy();
+                    current_loss = TrainStep(dataset.Image, dataset.Targets).numpy();
                 }
-                model.save_weights($"./YOLOv3/yolov3.{loss:F2}.h5");
+                if(current_loss < loss)
+                {
+                    loss = current_loss;
+                    model.save_weights($"./YOLOv3/yolov3.{loss:F2}.h5");
+                }
             }
         }
 
         public void Test()
         {
-            var input_layer = keras.layers.Input((INPUT_SIZE, INPUT_SIZE, 3));
+            var input_layer = keras.layers.Input((cfg.TEST.INPUT_SIZE[0], cfg.TEST.INPUT_SIZE[0], 3));
             var feature_maps = yolo.Apply(input_layer);
 
             var bbox_tensors = new Tensors();
@@ -192,7 +196,7 @@ namespace Models.Run
                 var pred_bbox = model.predict(image_data);
                 pred_bbox = pred_bbox.Select(x => tf.reshape(x, new object[] { -1, tf.shape(x)[-1] })).ToList();
                 var pred_bbox_concat = tf.concat(pred_bbox, axis: 0);
-                var bboxes = Utils.postprocess_boxes(pred_bbox_concat.numpy(), image_size, INPUT_SIZE, cfg.TEST.SCORE_THRESHOLD);
+                var bboxes = Utils.postprocess_boxes(pred_bbox_concat.numpy(), image_size, cfg.TEST.INPUT_SIZE[0], cfg.TEST.SCORE_THRESHOLD);
                 if(bboxes.size > 0)
                 {
                     var best_box_results = Utils.nms(bboxes, cfg.TEST.IOU_THRESHOLD, method: "nms");
