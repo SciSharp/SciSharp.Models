@@ -14,15 +14,15 @@ namespace SciSharp.Models.ImageClassification
 {
     public partial class TransferLearning 
     {
-        public ModelTestResult Test()
+        public ModelTestResult Test(TestingOptions options)
         {
-            if (!File.Exists(options.ModelPath))
+            if (!File.Exists(_options.ModelPath))
                 throw new FreezedGraphNotFoundException();
 
-            image_dataset = LoadDataFromDir(options.DataDir, testingPercentage: 1.0f, validationPercentage: 0);
+            image_dataset = LoadDataFromDir(_options.DataDir, testingPercentage: 1.0f, validationPercentage: 0);
 
             using var graph = tf.Graph().as_default();
-            graph.Import(options.ModelPath);
+            graph.Import(_options.ModelPath);
             var (jpeg_data_tensor, decoded_image_tensor) = add_jpeg_decoding();
 
             using var sess = tf.Session(graph);

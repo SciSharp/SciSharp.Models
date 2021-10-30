@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.4.0.20200915" />
-    <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.5.0" />
+    <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.6.0" />
   </ItemGroup>
 
   <ItemGroup>

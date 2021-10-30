@@ -3,11 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <LangVersion>9.0</LangVersion>
     <Authors>Haiping Chen</Authors>
     <Company>SciSharp STACK</Company>
-    <PackageReleaseNotes>1. Transfer Learning</PackageReleaseNotes>
+    <PackageReleaseNotes>1. Image classification (Transfer Learning)
+2. Image classification (CNN)</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,11 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="TensorFlow.Keras" Version="0.6.2" />
+    <PackageReference Include="TensorFlow.Keras" Version="0.6.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\TensorFlow.NET\src\TensorFlowNET.Keras\Tensorflow.Keras.csproj" />
     <ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
   </ItemGroup>
 

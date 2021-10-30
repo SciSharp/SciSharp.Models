@@ -21,7 +21,7 @@ namespace SciSharp.Models.ImageClassification
         string summaries_dir;
         string bottleneck_dir;
         bool isImportingGraph = true;
-        TaskOptions options;
+        TaskOptions _options;
         string[] labels;
         
         public TransferLearning()
@@ -49,7 +49,7 @@ namespace SciSharp.Models.ImageClassification
         {
             options.ModelPath = options.ModelPath ?? Path.Combine(taskDir, "saved_model.pb");
             options.LabelPath = options.LabelPath ?? Path.Combine(taskDir, "labels.txt");
-            this.options = options;
+            _options = options;
         }
 
         public void SetModelArgs<T>(T args)

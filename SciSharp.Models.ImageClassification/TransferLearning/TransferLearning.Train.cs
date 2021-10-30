@@ -38,9 +38,9 @@ namespace SciSharp.Models.ImageClassification
 
         public void Train(TrainingOptions options)
         {
-            image_dataset = LoadDataFromDir(this.options.DataDir, 
-                testingPercentage: this.options.TestingPercentage,
-                validationPercentage: this.options.ValidationPercentage);
+            image_dataset = LoadDataFromDir(_options.DataDir, 
+                testingPercentage: _options.TestingPercentage,
+                validationPercentage: _options.ValidationPercentage);
 
             var sw = new Stopwatch();
             using var graph = isImportingGraph ? ImportGraph() : BuildGraph();

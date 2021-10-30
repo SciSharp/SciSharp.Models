@@ -75,7 +75,7 @@ namespace SciSharp.Models.ImageClassification
         {
             // Create a single bottleneck file.
             print("Creating bottleneck at " + bottleneck_path);
-            var image_path = get_image_path(image_lists, label_name, options.DataDir, index, category);
+            var image_path = get_image_path(image_lists, label_name, _options.DataDir, index, category);
             if (!File.Exists(image_path))
                 print($"File does not exist {image_path}");
 

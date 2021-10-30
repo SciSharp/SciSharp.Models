@@ -9,7 +9,7 @@ namespace SciSharp.Models
     {
         void Train(TrainingOptions options);
         void SetModelArgs<T>(T args);
-        ModelTestResult Test();
+        ModelTestResult Test(TestingOptions options);
         ModelPredictResult Predict(Tensor input);
         void Config(TaskOptions options);
     }

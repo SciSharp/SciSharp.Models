@@ -47,8 +47,10 @@ namespace SciSharp.Models.ImageClassification
                     if (iteration % display_freq == 0)
                     {
                         // Calculate and display the batch loss and accuracy
-                        (loss_val, accuracy_val) = sess.run((graphBuiltResult.Loss, graphBuiltResult.Accuracy), new FeedItem(graphBuiltResult.Features, x_batch), new FeedItem(graphBuiltResult.Labels, y_batch));
-                        print($"iter {iteration.ToString("000")}: Loss={loss_val.ToString("0.0000")}, Training Accuracy={accuracy_val.ToString("P")} {sw.ElapsedMilliseconds}ms");
+                        (loss_val, accuracy_val) = sess.run((graphBuiltResult.Loss, graphBuiltResult.Accuracy), 
+                            new FeedItem(graphBuiltResult.Features, x_batch), 
+                            new FeedItem(graphBuiltResult.Labels, y_batch));
+                        print($"iter {iteration:000}: Loss={loss_val:0.0000}, Training Accuracy={accuracy_val:P} {sw.ElapsedMilliseconds}ms");
                         sw.Restart();
                     }
                 }
@@ -60,14 +62,20 @@ namespace SciSharp.Models.ImageClassification
                 SaveCheckpoint(sess);
                 print("---------------------------------------------------------");
             }
+            FreezeModel();
         }
 
-        void SaveCheckpoint(Session sess)
+        public string FreezeModel()
         {
-            var checkpoint = Path.Combine(_taskDir, "checkpoint.ckpt");
-            print($"Saving checking point {checkpoint} ...");
-            var saver = tf.train.Saver();
-            saver.save(sess, checkpoint);
+            print($"Freezing model to {Path.Combine(_taskDir, "saved_model.pb")}");
+            var checkpoint = Path.Combine(_taskDir, "checkpoint");
+            return tf.train.freeze_graph(checkpoint, "saved_model", new[] 
+            { 
+                "Train/Loss/loss", 
+                "Train/Accuracy/accuracy",
+                "OUT/add",
+                "Train/Prediction/predictions"
+            });
         }
     }
 }

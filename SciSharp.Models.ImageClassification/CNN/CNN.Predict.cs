@@ -1,12 +1,16 @@
 ﻿using SciSharp.Models.Exceptions;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Text;
 using Tensorflow;
 using Tensorflow.NumPy;
 using static Tensorflow.Binding;
 
 namespace SciSharp.Models.ImageClassification
 {
-    public partial class TransferLearning 
+    public partial class CNN
     {
         Session predictSession;
         public ModelPredictResult Predict(Tensor input)
@@ -25,10 +29,12 @@ namespace SciSharp.Models.ImageClassification
                 predictSession = tf.Session(graph);
             }
 
-            Tensor input_tensor = predictSession.graph.OperationByName(input_tensor_name);
-            Tensor output_tensor = predictSession.graph.OperationByName(final_tensor_name);
-            var result = predictSession.run(output_tensor, (input_tensor, input));
-            
+            Tensor x = predictSession.graph.OperationByName("Input/X");
+            // Tensor prediction = predictSession.graph.OperationByName("Train/Prediction/predictions");
+            Tensor output = predictSession.graph.OperationByName("OUT/add");
+
+            var result = predictSession.run(output, (x, input));
+
             var prob = np.squeeze(result);
             var idx = np.argmax(prob);
 

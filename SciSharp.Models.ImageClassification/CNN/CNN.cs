@@ -13,6 +13,7 @@ namespace SciSharp.Models.ImageClassification
         TaskOptions _options;
         int display_freq = 100;
         ConvArgs _convArgs;
+        string[] labels;
 
         public CNN()
         {
@@ -25,21 +26,9 @@ namespace SciSharp.Models.ImageClassification
             _options = options;
         }
 
-        public ModelPredictResult Predict(Tensor input)
-        {
-            var result = new ModelPredictResult();
-            return result;
-        }
-
         public void SetModelArgs<T>(T args)
         {
             _convArgs = (ConvArgs)Convert.ChangeType(args, typeof(ConvArgs));
-        }
-
-        public ModelTestResult Test()
-        {
-            var result = new ModelTestResult();
-            return result;
         }
     }
 }
