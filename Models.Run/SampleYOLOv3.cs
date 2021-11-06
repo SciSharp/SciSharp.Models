@@ -23,16 +23,12 @@ namespace Models.Run
     public class SampleYOLOv3
     {
         YOLOv3 yolo;
-        YoloDataset trainset, testset;
         YoloConfig cfg;
 
         OptimizerV2 optimizer;
-        IVariableV1 global_steps;
+        int global_steps;
         int warmup_steps;
         int total_steps;
-        Tensor lr_tensor;
-
-        Model model;
 
         public bool Run()
         {
@@ -41,9 +37,9 @@ namespace Models.Run
             cfg = new YoloConfig("YOLOv3");
             yolo = new YOLOv3(cfg);
 
-            PrepareData();
-            Train();
-            // Test();
+            var (trainset, testset) = PrepareData();
+            Train(trainset);
+            // Test(testset);
 
             return true;
         }
@@ -53,10 +49,11 @@ namespace Models.Run
         /// </summary>
         /// <param name="image_data"></param>
         /// <param name="targets"></param>
-        Tensor TrainStep(NDArray image_data, List<LabelBorderBox> targets)
+        Tensor TrainStep(Model model, NDArray image_data, List<LabelBorderBox> targets)
         {
             using var tape = tf.GradientTape();
             var pred_result = model.Apply(image_data, training: true);
+            
             var giou_loss = tf.constant(0.0f);
             var conf_loss = tf.constant(0.0f);
             var prob_loss = tf.constant(0.0f);
@@ -72,31 +69,33 @@ namespace Models.Run
             }
 
             var total_loss = giou_loss + conf_loss + prob_loss;
-
             var gradients = tape.gradient(total_loss, model.trainable_variables);
             optimizer.apply_gradients(zip(gradients, model.trainable_variables.Select(x => x as ResourceVariable)));
+
             float lr = optimizer.lr.numpy();
-            print($"=> STEP {global_steps.numpy():D4} lr:{lr} giou_loss: {giou_loss.numpy()} conf_loss: {conf_loss.numpy()} prob_loss: {prob_loss.numpy()} total_loss: {total_loss.numpy()}");
-            global_steps.assign_add(1);
+            print($"=> STEP {global_steps:D4} lr:{lr} giou_loss: {giou_loss.numpy()} conf_loss: {conf_loss.numpy()} prob_loss: {prob_loss.numpy()} total_loss: {total_loss.numpy()}");
+            global_steps++;
 
             // update learning rate
-            int global_steps_int = global_steps.numpy();
-            if (global_steps_int < warmup_steps)
+            if (global_steps < warmup_steps)
             {
-                lr = global_steps_int / (warmup_steps + 0f) * cfg.TRAIN.LEARN_RATE_INIT;
+                lr = global_steps / (warmup_steps + 0f) * cfg.TRAIN.LEARN_RATE_INIT;
             }
             else
             {
                 lr = (cfg.TRAIN.LEARN_RATE_END + 0.5f * (cfg.TRAIN.LEARN_RATE_INIT - cfg.TRAIN.LEARN_RATE_END) * 
-                    (1 + tf.cos((global_steps_int - warmup_steps + 0f) / (total_steps - warmup_steps) * (float)np.pi))).numpy();
+                    (1 + tf.cos((global_steps - warmup_steps + 0f) / (total_steps - warmup_steps) * (float)np.pi))).numpy();
             }
-            lr_tensor = tf.constant(lr);
+            var lr_tensor = tf.constant(lr);
             optimizer.lr.assign(lr_tensor);
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
 
             return total_loss;
         }
 
-        public void Train()
+        public void Train(YoloDataset trainset)
         {
             var input_layer = keras.layers.Input((416, 416, 3));
             var conv_tensors = yolo.Apply(input_layer);
@@ -109,15 +108,13 @@ namespace Models.Run
                 output_tensors.Add(pred_tensor);
             }
 
-            model = keras.Model(input_layer, output_tensors);
+            Model model = keras.Model(input_layer, output_tensors);
             model.summary();
 
             // download wights from https://drive.google.com/file/d/1J5N5Pqf1BG1sN_GWDzgViBcdK2757-tS/view?usp=sharing
-            // var weights = model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
             model.load_weights("./YOLOv3/yolov3.h5");
 
             optimizer = keras.optimizers.Adam();
-            global_steps = tf.Variable(1, trainable: false);
             int steps_per_epoch = trainset.Length;
             total_steps = cfg.TRAIN.EPOCHS * steps_per_epoch;
             warmup_steps = cfg.TRAIN.WARMUP_EPOCHS * steps_per_epoch;
@@ -129,7 +126,7 @@ namespace Models.Run
                 float current_loss = -1;
                 foreach (var dataset in trainset)
                 {
-                    current_loss = TrainStep(dataset.Image, dataset.Targets).numpy();
+                    current_loss = TrainStep(model, dataset.Image, dataset.Targets).numpy();
                 }
                 if(current_loss < loss)
                 {
@@ -139,7 +136,7 @@ namespace Models.Run
             }
         }
 
-        public void Test()
+        public void Test(YoloDataset testset)
         {
             var input_layer = keras.layers.Input((cfg.TEST.INPUT_SIZE[0], cfg.TEST.INPUT_SIZE[0], 3));
             var feature_maps = yolo.Apply(input_layer);
@@ -150,7 +147,7 @@ namespace Models.Run
                 var bbox_tensor = yolo.Decode(fm, i);
                 bbox_tensors.Add(bbox_tensor);
             }
-            model = keras.Model(input_layer, bbox_tensors);
+            Model model = keras.Model(input_layer, bbox_tensors);
 
             // var weights = model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
             model.load_weights("./YOLOv3/yolov3.mnist.h5");
@@ -206,13 +203,14 @@ namespace Models.Run
             }
         }
 
-        public void PrepareData()
+        public (YoloDataset, YoloDataset) PrepareData()
         {
             string dataDir = Path.Combine("YOLOv3", "data");
             Directory.CreateDirectory(dataDir);
 
-            trainset = new YoloDataset("train", cfg);
-            testset = new YoloDataset("test", cfg);
+            var trainset = new YoloDataset("train", cfg);
+            var testset = new YoloDataset("test", cfg);
+            return (trainset, testset);
         }
     }
 }

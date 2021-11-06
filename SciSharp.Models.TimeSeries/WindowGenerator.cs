@@ -103,6 +103,12 @@ namespace SciSharp.Models.TimeSeries
         public IDatasetV2 GetTestDataset()
              => MakeDataset(_test_df);
 
+        public Tensors GetSample()
+        {
+            var item = GetTrainingDataset().First();
+            return item;
+        }
+
         public override string ToString()
         {
             return $"Total window size: {_total_window_size}\r\n" +

@@ -20,7 +20,7 @@ namespace SciSharp.Models.TimeSeries
         protected override Tensors Call(Tensors inputs, Tensor state = null, bool? training = null)
         {
             var result = inputs[":", ":", $"{_label_index}"];
-            return result[":", ":", tf.newaxis];
+            return result[new Slice(":"), new Slice(":"), tf.newaxis];
         }
     }
 }

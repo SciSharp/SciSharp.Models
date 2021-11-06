@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Plot.NET\src\PlotNET\PlotNET.csproj" />
     <ProjectReference Include="..\SciSharp.Models.TextClassification\SciSharp.Models.TextClassification.csproj" />
     <ProjectReference Include="..\SciSharp.Models.TimeSeries\SciSharp.Models.TimeSeries.csproj" />
     <ProjectReference Include="..\SciSharp.Models.YOLOv3\SciSharp.Models.YOLOv3.csproj" />

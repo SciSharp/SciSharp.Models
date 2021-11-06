@@ -8,6 +8,7 @@ using static PandasNet.PandasApi;
 using System.IO;
 using SciSharp.Models.TimeSeries;
 using Tensorflow;
+using PlotNET.Extensions;
 
 namespace Models.Run
 {
@@ -24,9 +25,18 @@ namespace Models.Run
                 extract: true);
 
             var df = pd.read_csv(Path.Combine(zip_path, "jena_climate_2009_2016.csv"));
+            // deal with hourly predictions, so start by sub-sampling the data from 10-minute intervals to one-hour intervals:
             df = df[new Slice(5, step: 6)];
-            var date_time = pd.to_datetime(df.pop("Date Time"), "dd.MM.yyyy HH:mm:ss");
+            var date_time_string = df.pop("Date Time");
+            var date_time = pd.to_datetime(date_time_string, "dd.MM.yyyy HH:mm:ss");
             print(df.head());
+
+            // plot featuers
+            /*var plot_cols = new string[] { "T (degC)", "p (mbar)", "rho (g/m**3)" };
+            var plot_features = df[plot_cols];
+            plot_features.index = date_time_string;
+            plot_features.plot();*/
+
             print(df.describe().transpose());
 
             // Wind velocity
@@ -106,15 +116,15 @@ namespace Models.Run
 
             var (example_inputs, example_labels) = w2.SplitWindow(example_window);
             print("All shapes are: (batch, time, features)");
-            print($"Window shape: {example_window.TensorShape}");
-            print($"Inputs shape: {example_inputs.TensorShape}");
-            print($"Labels shape: {example_labels.TensorShape}");
+            print($"Window shape: {example_window.shape}");
+            print($"Inputs shape: {example_inputs.shape}");
+            print($"Labels shape: {example_labels.shape}");
 
             var train_data = w2.GetTrainingDataset();
             foreach(var (data, label) in train_data.take(1))
             {
-                print($"Inputs shape (batch, time, features): {data.TensorShape}");
-                print($"Labels shape (batch, time, features): {label.TensorShape}");
+                print($"Inputs shape (batch, time, features): {data.shape}");
+                print($"Labels shape (batch, time, features): {label.shape}");
             }
             
             var single_step_window = new WindowGenerator(input_width: 1, label_width: 1, shift: 1,
@@ -129,6 +139,15 @@ namespace Models.Run
 
             var test_data = single_step_window.GetTestDataset();
             var performance_baseline = baseline.evaluate(test_data);
+
+            var wide_window = new WindowGenerator(
+                input_width: 24, label_width: 24, shift: 1,
+                train_df: train_df, val_df: val_df, test_df: test_df,
+                label_columns: new[] { "T (degC)" });
+
+            print($"Input shape: {wide_window.GetSample()[0].shape}");
+            print($"Output shape: {baseline.Apply(wide_window.GetSample()[0]).shape}");
+
         }
     }
 }

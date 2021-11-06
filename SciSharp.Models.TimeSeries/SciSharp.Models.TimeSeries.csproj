@@ -15,12 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pandas.NET" Version="0.2.0" />
-    <PackageReference Include="TensorFlow.Keras" Version="0.6.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\TensorFlow.NET\src\TensorFlowNET.Keras\Tensorflow.Keras.csproj" />
+    <ProjectReference Include="..\..\Pandas.NET\src\Pandas.NET\Pandas.Net.csproj" />
     <ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
   </ItemGroup>
 

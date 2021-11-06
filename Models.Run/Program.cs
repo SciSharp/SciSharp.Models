@@ -7,6 +7,17 @@ namespace Models.Run
     {
         static void Main(string[] args)
         {
+            Run();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            Console.WriteLine("Completed.");
+            Console.ReadLine();
+        }
+
+        static void Run()
+        {
             /*var tc = new SampleBinaryTextClassification();
             tc.Run();
 
@@ -14,16 +25,14 @@ namespace Models.Run
             ar.LoadModel("simple_audio_model");
             ar.Run();*/
 
-            var ts = new SampleTimeSeries();
-            ts.Run();
+            /*var ts = new SampleTimeSeries();
+            ts.Run();*/
 
-            //var yolo3 = new SampleYOLOv3();
-            //yolo3.Run();
+            var yolo3 = new SampleYOLOv3();
+            yolo3.Run();
 
             // var transformer = new SampleTransformer();
             // transformer.Run();
-            Console.WriteLine("YOLOv3 is completed.");
-            Console.ReadLine();
         }
     }
 }
