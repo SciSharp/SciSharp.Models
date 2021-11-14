@@ -13,6 +13,7 @@ using static SharpCV.Binding;
 using SharpCV;
 using Utils = SciSharp.Models.YOLOv3.Utils;
 using Tensorflow.NumPy;
+using System.Diagnostics;
 
 namespace Models.Run
 {
@@ -53,7 +54,7 @@ namespace Models.Run
         {
             using var tape = tf.GradientTape();
             var pred_result = model.Apply(image_data, training: true);
-            
+
             var giou_loss = tf.constant(0.0f);
             var conf_loss = tf.constant(0.0f);
             var prob_loss = tf.constant(0.0f);
@@ -69,6 +70,10 @@ namespace Models.Run
             }
 
             var total_loss = giou_loss + conf_loss + prob_loss;
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
             var gradients = tape.gradient(total_loss, model.trainable_variables);
             optimizer.apply_gradients(zip(gradients, model.trainable_variables.Select(x => x as ResourceVariable)));
 
@@ -88,9 +93,6 @@ namespace Models.Run
             }
             var lr_tensor = tf.constant(lr);
             optimizer.lr.assign(lr_tensor);
-
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
 
             return total_loss;
         }
@@ -112,7 +114,7 @@ namespace Models.Run
             model.summary();
 
             // download wights from https://drive.google.com/file/d/1J5N5Pqf1BG1sN_GWDzgViBcdK2757-tS/view?usp=sharing
-            model.load_weights("./YOLOv3/yolov3.h5");
+            // model.load_weights("./YOLOv3/yolov3.h5");
 
             optimizer = keras.optimizers.Adam();
             int steps_per_epoch = trainset.Length;
@@ -126,7 +128,10 @@ namespace Models.Run
                 float current_loss = -1;
                 foreach (var dataset in trainset)
                 {
+                    var watch = new Stopwatch();
+                    watch.Start();
                     current_loss = TrainStep(model, dataset.Image, dataset.Targets).numpy();
+                    Console.WriteLine($"spent {watch.ElapsedMilliseconds} ms.");
                 }
                 if(current_loss < loss)
                 {
