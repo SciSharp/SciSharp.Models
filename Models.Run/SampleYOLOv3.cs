@@ -1,5 +1,4 @@
-﻿using SciSharp.Models.YOLOv3;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,9 +10,10 @@ using static Tensorflow.Binding;
 using static Tensorflow.KerasApi;
 using static SharpCV.Binding;
 using SharpCV;
-using Utils = SciSharp.Models.YOLOv3.Utils;
+using Utils = SciSharp.Models.ObjectDetection.Utils;
 using Tensorflow.NumPy;
 using System.Diagnostics;
+using SciSharp.Models.ObjectDetection;
 
 namespace Models.Run
 {
@@ -114,7 +114,7 @@ namespace Models.Run
             model.summary();
 
             // download wights from https://drive.google.com/file/d/1J5N5Pqf1BG1sN_GWDzgViBcdK2757-tS/view?usp=sharing
-            // model.load_weights("./YOLOv3/yolov3.h5");
+            model.load_weights("./YOLOv3/yolov3.h5");
 
             optimizer = keras.optimizers.Adam();
             int steps_per_epoch = trainset.Length;

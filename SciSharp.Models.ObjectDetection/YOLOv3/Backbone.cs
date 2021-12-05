@@ -4,7 +4,7 @@ using System.Text;
 using Tensorflow;
 using static Tensorflow.Binding;
 
-namespace SciSharp.Models.YOLOv3
+namespace SciSharp.Models.ObjectDetection
 {
     class Backbone
     {

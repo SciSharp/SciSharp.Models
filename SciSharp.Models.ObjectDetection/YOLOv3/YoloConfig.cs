@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace SciSharp.Models.YOLOv3
+namespace SciSharp.Models.ObjectDetection
 {
     public class YoloConfig
     {

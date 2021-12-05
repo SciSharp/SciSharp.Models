@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Tensorflow.NumPy;
 
-namespace SciSharp.Models.YOLOv3
+namespace SciSharp.Models.ObjectDetection
 {
     public class LabelBorderBox
     {

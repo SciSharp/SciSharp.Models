@@ -10,7 +10,7 @@ using static SharpCV.Binding;
 using SharpCV;
 using Tensorflow.NumPy;
 
-namespace SciSharp.Models.YOLOv3
+namespace SciSharp.Models.ObjectDetection
 {
     public class YoloDataset : IEnumerable<BatchFeedingImage>
     {

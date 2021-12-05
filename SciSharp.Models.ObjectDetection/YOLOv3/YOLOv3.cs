@@ -7,7 +7,7 @@ using static Tensorflow.KerasApi;
 using System.IO;
 using Tensorflow.NumPy;
 
-namespace SciSharp.Models.YOLOv3
+namespace SciSharp.Models.ObjectDetection
 {
     public class YOLOv3
     {

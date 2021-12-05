@@ -9,7 +9,7 @@ using Tensorflow.Keras.Layers;
 using static Tensorflow.Binding;
 using static Tensorflow.KerasApi;
 
-namespace SciSharp.Models.YOLOv3
+namespace SciSharp.Models.ObjectDetection
 {
     class Common
     {

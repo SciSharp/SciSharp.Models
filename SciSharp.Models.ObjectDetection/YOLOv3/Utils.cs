@@ -9,7 +9,7 @@ using Tensorflow.NumPy;
 using static SharpCV.Binding;
 using static Tensorflow.Binding;
 
-namespace SciSharp.Models.YOLOv3
+namespace SciSharp.Models.ObjectDetection
 {
     public class Utils
     {
