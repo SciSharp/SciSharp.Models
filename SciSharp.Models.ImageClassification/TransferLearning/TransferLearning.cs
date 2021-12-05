@@ -26,7 +26,6 @@ namespace SciSharp.Models.ImageClassification
         
         public TransferLearning()
         {
-            tf.compat.v1.disable_eager_execution();
             taskDir = Path.Combine(Directory.GetCurrentDirectory(), "image_classification_v1");
 
             // download graph meta data

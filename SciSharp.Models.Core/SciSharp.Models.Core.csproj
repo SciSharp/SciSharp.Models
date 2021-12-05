@@ -4,10 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
     <RootNamespace>SciSharp.Models</RootNamespace>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
     <Authors>Haiping Chen</Authors>
     <Company>SciSharp STACK</Company>
-    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+    <AssemblyVersion>0.3.1.0</AssemblyVersion>
     <PackageReleaseNotes>1. Image classification</PackageReleaseNotes>
   </PropertyGroup>
 
@@ -16,11 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="TensorFlow.Keras" Version="0.6.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\TensorFlow.NET\src\TensorFlowNET.Keras\Tensorflow.Keras.csproj" />
+    <PackageReference Include="TensorFlow.Keras" Version="0.6.5" />
   </ItemGroup>
 
 </Project>

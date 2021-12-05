@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using static Tensorflow.Binding;
-using Tensorflow.Keras.Utils;
-using System.Linq;
-using System.Diagnostics;
 using Tensorflow;
-using Tensorflow.NumPy;
 
 namespace SciSharp.Models.ImageClassification
 {
