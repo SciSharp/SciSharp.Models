@@ -14,6 +14,10 @@ namespace SciSharp.Models
         /// Validation data
         /// </summary>
         public FeatureAndLabel ValidationData { get; set; }
+        /// <summary>
+        /// Testing data
+        /// </summary>
+        public FeatureAndLabel TestingData { get; set; }
         public int Epochs { get; set; } = 5;
         public int BatchSize { get; set; } = 100;
         public int TrainingSteps { get; set; } = 100;

@@ -6,11 +6,16 @@ using static Tensorflow.Binding;
 using static Tensorflow.KerasApi;
 using System.IO;
 using Tensorflow.NumPy;
+using Tensorflow.Keras.Engine;
+using Tensorflow.Keras.Optimizers;
+using System.Diagnostics;
+using System;
 
 namespace SciSharp.Models.ObjectDetection
 {
-    public class YOLOv3
+    public class YOLOv3 : IObjectDetectionTask
     {
+        YOLOv3 yolo;
         YoloConfig cfg;
         public Dictionary<int, string> Classes { get; set; }
         int num_class => Classes.Count;
@@ -23,6 +28,17 @@ namespace SciSharp.Models.ObjectDetection
         Tensor pred_sbbox;
         Tensor pred_mbbox;
         Tensor pred_lbbox;
+
+        OptimizerV2 optimizer;
+        int global_steps;
+        int warmup_steps;
+        int total_steps;
+        YoloTrainingOptions _trainingOptions;
+
+        public YOLOv3()
+        {
+
+        }
 
         public YOLOv3(YoloConfig cfg_)
         {
@@ -237,6 +253,124 @@ namespace SciSharp.Models.ObjectDetection
             var iou = 1.0f * inter_area / union_area;
 
             return iou;
+        }
+
+        public void Train(TrainingOptions options)
+        {
+            var input_layer = keras.layers.Input((416, 416, 3));
+            var conv_tensors = yolo.Apply(input_layer);
+
+            var output_tensors = new Tensors();
+            foreach (var (i, conv_tensor) in enumerate(conv_tensors))
+            {
+                var pred_tensor = yolo.Decode(conv_tensor, i);
+                output_tensors.Add(conv_tensor);
+                output_tensors.Add(pred_tensor);
+            }
+
+            Model model = keras.Model(input_layer, output_tensors);
+            model.summary();
+
+            // download wights from https://drive.google.com/file/d/1J5N5Pqf1BG1sN_GWDzgViBcdK2757-tS/view?usp=sharing
+            // model.load_weights("./YOLOv3/yolov3.h5");
+
+            optimizer = keras.optimizers.Adam();
+            _trainingOptions = options as YoloTrainingOptions;
+            int steps_per_epoch = _trainingOptions.TrainingData.Length;
+            total_steps = cfg.TRAIN.EPOCHS * steps_per_epoch;
+            warmup_steps = cfg.TRAIN.WARMUP_EPOCHS * steps_per_epoch;
+
+            float loss = 1000;
+            foreach (var epoch in range(cfg.TRAIN.EPOCHS))
+            {
+                print($"EPOCH {epoch + 1:D4}");
+                float current_loss = -1;
+                foreach (var dataset in _trainingOptions.TrainingData)
+                {
+                    var watch = new Stopwatch();
+                    watch.Start();
+                    current_loss = TrainStep(model, dataset.Image, dataset.Targets).numpy();
+                    Console.WriteLine($"spent {watch.ElapsedMilliseconds} ms.");
+                }
+                if (current_loss < loss)
+                {
+                    loss = current_loss;
+                    model.save_weights($"./YOLOv3/yolov3.{loss:F2}.h5");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Train model in batch image
+        /// </summary>
+        /// <param name="image_data"></param>
+        /// <param name="targets"></param>
+        Tensor TrainStep(Model model, NDArray image_data, List<LabelBorderBox> targets)
+        {
+            using var tape = tf.GradientTape();
+            var pred_result = model.Apply(image_data, training: true);
+
+            var giou_loss = tf.constant(0.0f);
+            var conf_loss = tf.constant(0.0f);
+            var prob_loss = tf.constant(0.0f);
+
+            // optimizing process in different border boxes.
+            foreach (var (i, target) in enumerate(targets))
+            {
+                var (conv, pred) = (pred_result[i * 2], pred_result[i * 2 + 1]);
+                var loss_items = yolo.compute_loss(pred, conv, target.Label, target.BorderBox, i);
+                giou_loss += loss_items[0];
+                conf_loss += loss_items[1];
+                prob_loss += loss_items[2];
+            }
+
+            var total_loss = giou_loss + conf_loss + prob_loss;
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            var gradients = tape.gradient(total_loss, model.trainable_variables);
+            optimizer.apply_gradients(zip(gradients, model.trainable_variables.Select(x => x as ResourceVariable)));
+
+            float lr = optimizer.lr.numpy();
+            print($"=> STEP {global_steps:D4} lr:{lr} giou_loss: {giou_loss.numpy()} conf_loss: {conf_loss.numpy()} prob_loss: {prob_loss.numpy()} total_loss: {total_loss.numpy()}");
+            global_steps++;
+
+            // update learning rate
+            if (global_steps < warmup_steps)
+            {
+                lr = global_steps / (warmup_steps + 0f) * cfg.TRAIN.LEARN_RATE_INIT;
+            }
+            else
+            {
+                lr = (cfg.TRAIN.LEARN_RATE_END + 0.5f * (cfg.TRAIN.LEARN_RATE_INIT - cfg.TRAIN.LEARN_RATE_END) *
+                    (1 + tf.cos((global_steps - warmup_steps + 0f) / (total_steps - warmup_steps) * (float)np.pi))).numpy();
+            }
+            var lr_tensor = tf.constant(lr);
+            optimizer.lr.assign(lr_tensor);
+
+            return total_loss;
+        }
+
+        public void SetModelArgs<T>(T args)
+        {
+            cfg = args as YoloConfig;
+            yolo = new YOLOv3(cfg);
+        }
+
+        public ModelTestResult Test(TestingOptions options)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public ModelPredictResult Predict(Tensor input)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Config(TaskOptions options)
+        {
+            
         }
     }
 }

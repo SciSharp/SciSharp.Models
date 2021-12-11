@@ -46,7 +46,7 @@ namespace SciSharp.Models.ObjectDetection
             image_paded[new Slice(dh, nh + dh), new Slice(dw, nw + dw), Slice.All] = image_resized;
             image_paded = image_paded / 255;
 
-            if (gt_boxes == null)
+            if (gt_boxes is null)
             {
                 return (image_paded, gt_boxes);
             }
@@ -87,17 +87,17 @@ namespace SciSharp.Models.ObjectDetection
             var dw = (input_size - resize_ratio * org_w) / 2;
             var dh = (input_size - resize_ratio * org_h) / 2;
 
-            pred_coor[Slice.All, new Slice(0, 4, 2)] = 1.0 * (pred_coor[Slice.All, new Slice(0, 4, 2)] - dw) / resize_ratio;
-            pred_coor[Slice.All, new Slice(1, 4, 2)] = 1.0 * (pred_coor[Slice.All, new Slice(1, 4, 2)] - dh) / resize_ratio;
+            pred_coor[Slice.All, new Slice(0, 4, 2)] = 1.0f * (pred_coor[Slice.All, new Slice(0, 4, 2)] - dw) / resize_ratio;
+            pred_coor[Slice.All, new Slice(1, 4, 2)] = 1.0f * (pred_coor[Slice.All, new Slice(1, 4, 2)] - dh) / resize_ratio;
 
             // (3) clip some boxes those are out of range
             pred_coor = np.concatenate(new[] 
             {
-                np.maximum(pred_coor[Slice.All, new Slice(0, 2)], np.array(0, 0)),
-                np.minimum(pred_coor[Slice.All, new Slice(2)], np.array(org_w - 1, org_h - 1))
+                np.maximum(pred_coor[Slice.All, new Slice(0, 2)], np.array(0f, 0f)),
+                np.minimum(pred_coor[Slice.All, new Slice(2)], np.array(org_w - 1f, org_h - 1f))
             }, axis: -1);
             var invalid_mask = np.logical_or(pred_coor[Slice.All, 0] > pred_coor[Slice.All, 2], pred_coor[Slice.All, 1] > pred_coor[Slice.All, 3]);
-            pred_coor[invalid_mask] = 0;
+            pred_coor[invalid_mask] = 0f;
 
             // (4) discard some invalid boxes
             var xx = pred_coor[Slice.All, new Slice(2, 4)] - pred_coor[Slice.All, new Slice(0, 2)];
@@ -105,7 +105,7 @@ namespace SciSharp.Models.ObjectDetection
             var scale_mask = np.logical_and(valid_scale[0] < bboxes_scale, bboxes_scale < valid_scale[1]);
 
             // (5) discard some boxes with low scores
-            var classes = np.argmax(pred_prob, axis: -1);
+            var classes = np.argmax(pred_prob, axis: -1).astype(tf.float32);
             var scores = pred_conf * pred_prob[np.arange(len(pred_coor)), classes];
             var score_mask = scores > score_threshold;
             var mask = np.logical_and(scale_mask, score_mask);
@@ -198,7 +198,7 @@ namespace SciSharp.Models.ObjectDetection
                 var cls_bboxes = bboxes[cls_mask];
                 while(len(cls_bboxes) > 0)
                 {
-                    var max_ind = np.argmax(cls_bboxes[Slice.All, 4]);
+                    int max_ind = np.argmax(cls_bboxes[Slice.All, 4]);
                     var best_bbox = cls_bboxes[max_ind];
                     best_bboxes.Add(best_bbox);
                     cls_bboxes = np.concatenate(new[] { cls_bboxes[new Slice(0, max_ind)], cls_bboxes[new Slice(max_ind + 1)] });

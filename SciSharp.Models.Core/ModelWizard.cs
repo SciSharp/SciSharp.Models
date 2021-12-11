@@ -20,5 +20,13 @@ namespace SciSharp.Models
             _context.ImageClassificationTask.Config(options);
             return _context.ImageClassificationTask;
         }
+
+        public IObjectDetectionTask AddObjectDetectionTask<T>(TaskOptions options)
+            where T : IObjectDetectionTask, new()
+        {
+            _context.ObjectDetectionTask = new T();
+            _context.ObjectDetectionTask.Config(options);
+            return _context.ObjectDetectionTask;
+        }
     }
 }

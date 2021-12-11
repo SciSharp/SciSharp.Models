@@ -10,6 +10,38 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="YOLOv3\python\**" />
+    <EmbeddedResource Remove="YOLOv3\python\**" />
+    <None Remove="YOLOv3\python\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="YOLOv3\data\anchors\basline_anchors.txt" />
+    <None Remove="YOLOv3\data\anchors\coco_anchors.txt" />
+    <None Remove="YOLOv3\data\classes\coco.names" />
+    <None Remove="YOLOv3\data\classes\voc.names" />
+    <None Remove="YOLOv3\data\classes\yymnist.names" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="YOLOv3\data\anchors\basline_anchors.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="YOLOv3\data\anchors\coco_anchors.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="YOLOv3\data\classes\coco.names">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="YOLOv3\data\classes\voc.names">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="YOLOv3\data\classes\yymnist.names">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="SharpCV" Version="0.10.1" />
   </ItemGroup>
 

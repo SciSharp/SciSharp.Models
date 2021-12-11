@@ -7,5 +7,6 @@ namespace SciSharp.Models
     public class ModelContext
     {
         public IImageClassificationTask ImageClassificationTask { get; set; }
+        public IObjectDetectionTask ObjectDetectionTask { get; set; }
     }
 }
