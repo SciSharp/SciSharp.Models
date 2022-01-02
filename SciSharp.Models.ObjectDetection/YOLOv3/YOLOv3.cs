@@ -13,7 +13,8 @@ using System;
 
 namespace SciSharp.Models.ObjectDetection
 {
-    public class YOLOv3 : IObjectDetectionTask
+    // https://github.com/YunYang1994/TensorFlow2.0-Examples/tree/master/4-Object_Detection/YOLOV3
+    public partial class YOLOv3 : IObjectDetectionTask
     {
         YOLOv3 yolo;
         YoloConfig cfg;
@@ -272,7 +273,7 @@ namespace SciSharp.Models.ObjectDetection
             model.summary();
 
             // download wights from https://drive.google.com/file/d/1J5N5Pqf1BG1sN_GWDzgViBcdK2757-tS/view?usp=sharing
-            // model.load_weights("./YOLOv3/yolov3.h5");
+            model.load_weights("./YOLOv3/yolov3.h5");
 
             optimizer = keras.optimizers.Adam();
             _trainingOptions = options as YoloTrainingOptions;
@@ -283,15 +284,16 @@ namespace SciSharp.Models.ObjectDetection
             float loss = 1000;
             foreach (var epoch in range(cfg.TRAIN.EPOCHS))
             {
-                print($"EPOCH {epoch + 1:D4}");
+                print($"EPOCH {epoch + 1:D4}/{cfg.TRAIN.EPOCHS:D4}");
                 float current_loss = -1;
+                var watch = new Stopwatch();
                 foreach (var dataset in _trainingOptions.TrainingData)
                 {
-                    var watch = new Stopwatch();
-                    watch.Start();
+                    watch.Restart();
                     current_loss = TrainStep(model, dataset.Image, dataset.Targets).numpy();
-                    Console.WriteLine($"spent {watch.ElapsedMilliseconds} ms.");
+                    print($"Spent {watch.ElapsedMilliseconds} ms.");
                 }
+
                 if (current_loss < loss)
                 {
                     loss = current_loss;
@@ -333,7 +335,7 @@ namespace SciSharp.Models.ObjectDetection
             optimizer.apply_gradients(zip(gradients, model.trainable_variables.Select(x => x as ResourceVariable)));
 
             float lr = optimizer.lr.numpy();
-            print($"=> STEP {global_steps:D4} lr:{lr} giou_loss: {giou_loss.numpy()} conf_loss: {conf_loss.numpy()} prob_loss: {prob_loss.numpy()} total_loss: {total_loss.numpy()}");
+            print($"=> STEP {global_steps:D4}/{total_steps:D4} lr:{lr} giou_loss: {giou_loss.numpy()} conf_loss: {conf_loss.numpy()} prob_loss: {prob_loss.numpy()} total_loss: {total_loss.numpy()}");
             global_steps++;
 
             // update learning rate
@@ -346,8 +348,7 @@ namespace SciSharp.Models.ObjectDetection
                 lr = (cfg.TRAIN.LEARN_RATE_END + 0.5f * (cfg.TRAIN.LEARN_RATE_INIT - cfg.TRAIN.LEARN_RATE_END) *
                     (1 + tf.cos((global_steps - warmup_steps + 0f) / (total_steps - warmup_steps) * (float)np.pi))).numpy();
             }
-            var lr_tensor = tf.constant(lr);
-            optimizer.lr.assign(lr_tensor);
+            optimizer.lr.assign(lr);
 
             return total_loss;
         }
@@ -356,11 +357,6 @@ namespace SciSharp.Models.ObjectDetection
         {
             cfg = args as YoloConfig;
             yolo = new YOLOv3(cfg);
-        }
-
-        public ModelTestResult Test(TestingOptions options)
-        {
-            throw new System.NotImplementedException();
         }
 
         public ModelPredictResult Predict(Tensor input)

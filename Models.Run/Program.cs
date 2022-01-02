@@ -18,18 +18,14 @@ namespace Models.Run
 
         static void Run()
         {
-            /*var tc = new SampleBinaryTextClassification();
-            tc.Run();
+            //var sample = new SampleBinaryTextClassification();
 
-            var ar = new SampleAudioRecognition();
-            ar.LoadModel("simple_audio_model");
-            ar.Run();*/
+            //var ar = new SampleAudioRecognition();
+            //ar.LoadModel("simple_audio_model");
 
-            /*var ts = new SampleTimeSeries();
-            ts.Run();*/
+            var sample = new SampleTimeSeries();
 
-            var yolo3 = new SampleYOLOv3();
-            yolo3.Run();
+            sample.Run();
 
             // var transformer = new SampleTransformer();
             // transformer.Run();

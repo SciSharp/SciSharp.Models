@@ -74,7 +74,7 @@ namespace SciSharp.Models.ImageClassification
                 // var tf.summary.histogram("weight", W);
                 var b = bias_variable("b", new[] { num_filters });
                 // tf.summary.histogram("bias", b);
-                var layer = tf.nn.conv2d(x, W,
+                var layer = tf.nn.conv2d(x, W.AsTensor(),
                                      strides: new int[] { 1, stride, stride, 1 },
                                      padding: "SAME");
                 layer += b.AsTensor();

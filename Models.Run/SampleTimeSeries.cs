@@ -9,6 +9,8 @@ using System.IO;
 using SciSharp.Models.TimeSeries;
 using Tensorflow;
 using PlotNET.Extensions;
+using PandasNet;
+using Tensorflow.Keras;
 
 namespace Models.Run
 {
@@ -75,13 +77,6 @@ namespace Models.Run
             df["Year sin"] = pd.sin(timestamp_s * (2 * pd.pi / year));
             df["Year cos"] = pd.cos(timestamp_s * (2 * pd.pi / year));
 
-            // Split the data
-            var column_indices = enumerate(df.columns).Select(x => new
-            {
-                Index = x.Item1,
-                Name = x.Item2.Name
-            }).ToArray();
-
             var n = df.shape[0];
             var num_features = df.shape[1];
             var train_df = df[new Slice(0, pd.int32(n * 0.7))];
@@ -126,10 +121,24 @@ namespace Models.Run
                 print($"Inputs shape (batch, time, features): {data.shape}");
                 print($"Labels shape (batch, time, features): {label.shape}");
             }
-            
+
+            Baseline(df, train_df, val_df, test_df);
+
+            // Linearmodel(df, train_df, val_df, test_df);
+        }
+
+        void Baseline(DataFrame df, DataFrame train_df, DataFrame val_df, DataFrame test_df)
+        {
             var single_step_window = new WindowGenerator(input_width: 1, label_width: 1, shift: 1,
                 train_df: train_df, val_df: val_df, test_df: test_df,
                 label_columns: new[] { "T (degC)" });
+
+            // Split the data
+            var column_indices = enumerate(df.columns).Select(x => new
+            {
+                Index = x.Item1,
+                Name = x.Item2.Name
+            }).ToArray();
 
             var baseline = new Baseline(column_indices.First(x => x.Name == "T (degC)").Index);
             baseline.compile(optimizer: "rmsprop", loss: "mse", metrics: new string[] { "mae" });
@@ -145,9 +154,39 @@ namespace Models.Run
                 train_df: train_df, val_df: val_df, test_df: test_df,
                 label_columns: new[] { "T (degC)" });
 
-            print($"Input shape: {wide_window.GetSample()[0].shape}");
-            print($"Output shape: {baseline.Apply(wide_window.GetSample()[0]).shape}");
+            var sample = wide_window.GetSample()[0];
+            print($"Input shape: {sample.shape}");
+            print($"Output shape: {baseline.Apply(sample).shape}");
+        }
 
+        void Linearmodel(DataFrame df, DataFrame train_df, DataFrame val_df, DataFrame test_df)
+        {
+            var single_step_window = new WindowGenerator(input_width: 1, label_width: 1, shift: 1,
+                train_df: train_df, val_df: val_df, test_df: test_df,
+                label_columns: new[] { "T (degC)" });
+
+            var linear = keras.Sequential(new List<ILayer> { keras.layers.Dense(units: 1) });
+
+            var sample = single_step_window.GetSample()[0];
+            print($"Input shape: {sample.shape}");
+            print($"Output shape: {linear.Apply(sample).shape}");
+
+            /*early_stopping = keras.callbacks.EarlyStopping(monitor = "val_loss",
+                                                  patience = patience,
+                                                  mode = 'min')*/
+
+            linear.compile(loss: keras.losses.MeanSquaredError(),
+                          optimizer: keras.optimizers.Adam(),
+                          metrics: new[] { "mae" });
+
+            var train_data = single_step_window.GetTrainingDataset();
+            var val_data = single_step_window.GetValidationDataset();
+            var test_data = single_step_window.GetTestDataset();
+
+            linear.fit(train_data, epochs: 20, validation_data: val_data);
+
+            var val_performance_baseline = linear.evaluate(val_data);
+            var performance_baseline = linear.evaluate(test_data);
         }
     }
 }

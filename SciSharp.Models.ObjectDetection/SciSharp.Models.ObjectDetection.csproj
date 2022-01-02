@@ -42,10 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SharpCV" Version="0.10.1" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\SharpCV\src\SharpCV\SharpCV.csproj" />
     <ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
   </ItemGroup>
 

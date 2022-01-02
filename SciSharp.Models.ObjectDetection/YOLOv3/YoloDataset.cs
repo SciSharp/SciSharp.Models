@@ -211,8 +211,7 @@ namespace SciSharp.Models.ObjectDetection
 
         public IEnumerator<BatchFeedingImage> GetEnumerator()
         {
-            tf.device("/cpu:0");
-
+            // tf.device("/cpu:0");
             train_input_size = train_input_sizes[new Random().Next(0, train_input_sizes.Length - 1)];
             train_output_sizes = train_input_size / strides;
             var batch_image = np.zeros((batch_size, train_input_size, train_input_size, 3), np.float32);
