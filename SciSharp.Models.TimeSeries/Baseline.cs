@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Tensorflow;
 using Tensorflow.Keras.ArgsDefinition;
 using Tensorflow.Keras.Engine;
@@ -8,7 +6,7 @@ using static Tensorflow.Binding;
 
 namespace SciSharp.Models.TimeSeries
 {
-    public class Baseline : Model
+    class Baseline : Model
     {
         int _label_index;
 

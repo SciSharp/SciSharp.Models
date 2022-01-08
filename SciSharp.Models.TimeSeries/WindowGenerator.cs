@@ -11,12 +11,12 @@ namespace SciSharp.Models.TimeSeries
 {
     public class WindowGenerator
     {
+        /// <summary>
+        /// Access to multiple time steps when making predictions
+        /// </summary>
         int _input_width;
         int _label_width;
         int _shift;
-        DataFrame _train_df;
-        DataFrame _val_df;
-        DataFrame _test_df;
         string[] _label_columns;
         (string, int)[] _label_columns_indices;
         Dictionary<string, int> _column_indices = new Dictionary<string, int>();
@@ -28,16 +28,13 @@ namespace SciSharp.Models.TimeSeries
         Slice _labels_slice;
         int[] _label_indices;
 
-        public WindowGenerator(int input_width, int label_width, int shift, 
-            DataFrame train_df = null, DataFrame val_df = null, DataFrame test_df = null,
+        public WindowGenerator(int input_width, int label_width, int shift,
+            List<Column> columns = null,
             string[] label_columns = null)
         {
             _input_width = input_width;
             _label_width = label_width;
             _shift = shift;
-            _train_df = train_df;
-            _val_df = val_df;
-            _test_df = test_df;
             _label_columns = label_columns;
 
             // Work out the label column indices.
@@ -45,9 +42,9 @@ namespace SciSharp.Models.TimeSeries
                 .Select(x => (label_columns[x], x))
                 .ToArray();
 
-            Enumerable.Range(0, train_df.columns.Count)
+            Enumerable.Range(0, columns.Count)
                 .ToList()
-                .ForEach(x => _column_indices[train_df.columns[x].Name] = x);
+                .ForEach(x => _column_indices[columns[x].Name] = x);
 
             _total_window_size = input_width + shift;
 
@@ -82,6 +79,25 @@ namespace SciSharp.Models.TimeSeries
             return (inputs, labels);
         }
 
+        public (IDatasetV2, IDatasetV2, IDatasetV2) GenerateDataset(DataFrame df)
+        {
+            var n = df.shape[0];
+            var num_features = df.shape[1];
+            var train_df = df[new Slice(0, pd.int32(n * 0.7))];
+            var val_df = df[new Slice(pd.int32(n * 0.7), pd.int32(n * 0.9))];
+            var test_df = df[new Slice(pd.int32(n * 0.9))];
+
+            // Normalize the data
+            var train_mean = train_df.mean();
+            var train_std = train_df.std();
+
+            train_df = (train_df - train_mean) / train_std;
+            val_df = (val_df - train_mean) / train_std;
+            test_df = (test_df - train_mean) / train_std;
+
+            return (MakeDataset(train_df), MakeDataset(val_df), MakeDataset(test_df));
+        }
+
         IDatasetV2 MakeDataset(DataFrame df)
         {
             var data = tf.convert_to_tensor(pd.array<float, float>(df));
@@ -94,20 +110,7 @@ namespace SciSharp.Models.TimeSeries
             return ds;
         }
 
-        public IDatasetV2 GetTrainingDataset()
-             => MakeDataset(_train_df);
-
-        public IDatasetV2 GetValidationDataset()
-            => MakeDataset(_val_df);
-
-        public IDatasetV2 GetTestDataset()
-             => MakeDataset(_test_df);
-
-        public Tensors GetSample()
-        {
-            var item = GetTrainingDataset().First();
-            return item;
-        }
+        public int GetColumnIndex(string name) => _column_indices[name];
 
         public override string ToString()
         {

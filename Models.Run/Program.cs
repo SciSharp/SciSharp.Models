@@ -23,10 +23,6 @@ namespace Models.Run
             //var ar = new SampleAudioRecognition();
             //ar.LoadModel("simple_audio_model");
 
-            var sample = new SampleTimeSeries();
-
-            sample.Run();
-
             // var transformer = new SampleTransformer();
             // transformer.Run();
         }

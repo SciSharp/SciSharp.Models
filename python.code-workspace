@@ -23,6 +23,7 @@
 				"program": "${workspaceFolder:time_series}/time_series.py",
 				"console": "integratedTerminal",
 				"cwd": "${workspaceFolder:time_series}",
+				"debugStdLib": true,
 				"justMyCode": false
 			}
 		]

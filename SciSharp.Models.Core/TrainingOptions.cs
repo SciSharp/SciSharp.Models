@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Tensorflow;
 
 namespace SciSharp.Models
 {
@@ -14,10 +15,7 @@ namespace SciSharp.Models
         /// Validation data
         /// </summary>
         public FeatureAndLabel ValidationData { get; set; }
-        /// <summary>
-        /// Testing data
-        /// </summary>
-        public FeatureAndLabel TestingData { get; set; }
+        public (IDatasetV2, IDatasetV2) Dataset { get; set; }
         public int Epochs { get; set; } = 5;
         public int BatchSize { get; set; } = 100;
         public int TrainingSteps { get; set; } = 100;

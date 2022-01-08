@@ -28,5 +28,13 @@ namespace SciSharp.Models
             _context.ObjectDetectionTask.Config(options);
             return _context.ObjectDetectionTask;
         }
+
+        public ITimeSeriesTask AddTimeSeriesTask<T>(TaskOptions options)
+            where T : ITimeSeriesTask, new()
+        {
+            _context.TimeSeriesTask = new T();
+            _context.TimeSeriesTask.Config(options);
+            return _context.TimeSeriesTask;
+        }
     }
 }

@@ -21,11 +21,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pandas.Net", "..\Pandas.NET
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlotNET", "..\Plot.NET\src\PlotNET\PlotNET.csproj", "{A828BF8E-F2A5-45CB-91CE-2A6901DA19F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SciSharp.Models.ObjectDetection", "SciSharp.Models.ObjectDetection\SciSharp.Models.ObjectDetection.csproj", "{6ECE2D65-09E3-42D5-B6C1-9F58DA122367}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SciSharp.Models.ObjectDetection", "SciSharp.Models.ObjectDetection\SciSharp.Models.ObjectDetection.csproj", "{6ECE2D65-09E3-42D5-B6C1-9F58DA122367}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tensorflow.Binding", "..\TensorFlow.NET\src\TensorFlowNET.Core\Tensorflow.Binding.csproj", "{DA9F0097-969F-4CE0-A684-94B0FF21545A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tensorflow.Keras", "..\TensorFlow.NET\src\TensorFlowNET.Keras\Tensorflow.Keras.csproj", "{1DFD5DF2-B11A-45D1-AF4F-AB914FFA410F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpCV", "..\SharpCV\src\SharpCV\SharpCV.csproj", "{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -331,6 +333,30 @@ Global
 		{1DFD5DF2-B11A-45D1-AF4F-AB914FFA410F}.Release|x64.Build.0 = Release|x64
 		{1DFD5DF2-B11A-45D1-AF4F-AB914FFA410F}.Release|x86.ActiveCfg = Release|Any CPU
 		{1DFD5DF2-B11A-45D1-AF4F-AB914FFA410F}.Release|x86.Build.0 = Release|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug|x64.ActiveCfg = Debug|x64
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug|x64.Build.0 = Debug|x64
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug|x86.Build.0 = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug-Minimal|Any CPU.ActiveCfg = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug-Minimal|Any CPU.Build.0 = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug-Minimal|x64.ActiveCfg = Debug|x64
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug-Minimal|x64.Build.0 = Debug|x64
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug-Minimal|x86.ActiveCfg = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Debug-Minimal|x86.Build.0 = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Publish|Any CPU.ActiveCfg = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Publish|Any CPU.Build.0 = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Publish|x64.ActiveCfg = Debug|x64
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Publish|x64.Build.0 = Debug|x64
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Publish|x86.ActiveCfg = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Publish|x86.Build.0 = Debug|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Release|x64.ActiveCfg = Release|x64
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Release|x64.Build.0 = Release|x64
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Release|x86.ActiveCfg = Release|Any CPU
+		{6492B4BB-BB29-4945-9CCA-2FBC8B79957D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
