@@ -17,27 +17,18 @@ namespace SciSharp.Models.ImageClassification
             if (labels == null)
                 labels = File.ReadAllLines(_options.LabelPath);
 
-            NDArray result;
             // import graph and variables
             if (predictSession == null)
             {
                 var graph = tf.Graph().as_default();
                 graph.Import(_options.ModelPath);
                 predictSession = tf.Session(graph);
-
-                var (input_tensor, output_tensor) = GetInputOutputTensors();
-                result = predictSession.run(output_tensor, (input_tensor, input));
-
                 tf.Context.restore_mode();
             }
-            else
-            {
-                predictSession.graph.as_default();
-                var (input_tensor, output_tensor) = GetInputOutputTensors();
-                result = predictSession.run(output_tensor, (input_tensor, input));
-                ops.pop_graph();
-            }
-            
+
+            var (input_tensor, output_tensor) = GetInputOutputTensors();
+            var result = predictSession.run(output_tensor, (input_tensor, input));
+
             var prob = np.squeeze(result);
             var idx = np.argmax(prob);
 

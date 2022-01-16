@@ -27,12 +27,10 @@ namespace SciSharp.Models.ImageClassification
                 var graph = tf.Graph().as_default();
                 graph.Import(_options.ModelPath);
                 predictSession = tf.Session(graph);
+                tf.Context.restore_mode();
             }
 
-            Tensor x = predictSession.graph.OperationByName("Input/X");
-            // Tensor prediction = predictSession.graph.OperationByName("Train/Prediction/predictions");
-            Tensor output = predictSession.graph.OperationByName("OUT/add");
-
+            var (x, output) = GetInputOutputTensors();
             var result = predictSession.run(output, (x, input));
 
             var prob = np.squeeze(result);
@@ -45,6 +43,14 @@ namespace SciSharp.Models.ImageClassification
                 Label = labels[idx],
                 Probability = prob[idx]
             };
+        }
+
+        (Tensor, Tensor) GetInputOutputTensors()
+        {
+            // Tensor prediction = predictSession.graph.OperationByName("Train/Prediction/predictions");
+            Tensor input_tensor = predictSession.graph.OperationByName("Input/X");
+            Tensor output_tensor = predictSession.graph.OperationByName("OUT/add");
+            return (input_tensor, output_tensor);
         }
     }
 }
