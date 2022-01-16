@@ -32,8 +32,10 @@ namespace SciSharp.Models.ImageClassification
             }
             else
             {
+                predictSession.graph.as_default();
                 var (input_tensor, output_tensor) = GetInputOutputTensors();
                 result = predictSession.run(output_tensor, (input_tensor, input));
+                ops.pop_graph();
             }
             
             var prob = np.squeeze(result);
