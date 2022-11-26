@@ -48,7 +48,7 @@ namespace SciSharp.Models.ObjectDetection
 
             public int BATCH_SIZE = 4;
             // new int[] { 320, 352, 384, 416, 448, 480, 512, 544, 576, 608 };
-            public int[] INPUT_SIZE = new int[] { 416 }; 
+            public int[] INPUT_SIZE = new int[] { 320, 320, 3 }; 
             public bool DATA_AUG = true;
             public float LEARN_RATE_INIT = 1e-3f;
             public float LEARN_RATE_END = 1e-6f;

@@ -258,7 +258,10 @@ namespace SciSharp.Models.ObjectDetection
 
         public void Train(TrainingOptions options)
         {
-            var input_layer = keras.layers.Input((416, 416, 3));
+            // tf.debugging.set_log_device_placement(true);
+            // tf.Context.Config.GpuOptions.AllowGrowth = true;
+
+            var input_layer = keras.layers.Input(cfg.TRAIN.INPUT_SIZE, cfg.TRAIN.BATCH_SIZE);
             var conv_tensors = yolo.Apply(input_layer);
 
             var output_tensors = new Tensors();
