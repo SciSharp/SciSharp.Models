@@ -48,7 +48,7 @@ namespace SciSharp.Models.ObjectDetection
 
             public int BATCH_SIZE = 4;
             // new int[] { 320, 352, 384, 416, 448, 480, 512, 544, 576, 608 };
-            public int[] INPUT_SIZE = new int[] { 320, 320, 3 }; 
+            public int[] INPUT_SIZE = new int[] { 512, 512, 3 }; 
             public bool DATA_AUG = true;
             public float LEARN_RATE_INIT = 1e-3f;
             public float LEARN_RATE_END = 1e-6f;
@@ -69,8 +69,8 @@ namespace SciSharp.Models.ObjectDetection
         {
             string _root;
 
-            public int BATCH_SIZE = 2;
-            public int[] INPUT_SIZE = new int[] { 544 };
+            public int BATCH_SIZE = 1;
+            public int[] INPUT_SIZE = new int[] { 512, 512, 3 };
             public bool DATA_AUG = false;
             public bool WRITE_IMAGE = true;
             public string DECTECTED_IMAGE_PATH;

@@ -15,7 +15,7 @@ namespace SciSharp.Models.ObjectDetection
     {
         public ModelTestResult Test(TestingOptions options)
         {
-            var input_layer = keras.layers.Input((cfg.TEST.INPUT_SIZE[0], cfg.TEST.INPUT_SIZE[0], 3));
+            var input_layer = keras.layers.Input(cfg.TEST.INPUT_SIZE, cfg.TEST.BATCH_SIZE);
             var feature_maps = yolo.Apply(input_layer);
 
             var bbox_tensors = new Tensors();
@@ -26,7 +26,6 @@ namespace SciSharp.Models.ObjectDetection
             }
             Model model = keras.Model(input_layer, bbox_tensors);
 
-            // var weights = model.load_weights("D:/Projects/SciSharp.Models/yolov3.h5");
             model.load_weights("./YOLOv3/yolov3.h5");
 
             var mAP_dir = Path.Combine("mAP", "ground-truth");

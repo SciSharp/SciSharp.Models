@@ -81,7 +81,7 @@ namespace Models.Run
                 output_sequence_length: sequence_length);
 
             var train_text = raw_train_ds.map(inputs => inputs[0]);
-            vectorize_layer.adapt(train_text);
+            // vectorize_layer.adapt(train_text);
         }
     }
 }

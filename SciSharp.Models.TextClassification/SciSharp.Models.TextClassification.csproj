@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="text_classification_py\**" />
+    <EmbeddedResource Remove="text_classification_py\**" />
+    <None Remove="text_classification_py\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
   </ItemGroup>
 
