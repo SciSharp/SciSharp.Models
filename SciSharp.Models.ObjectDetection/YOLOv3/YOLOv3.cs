@@ -334,8 +334,8 @@ namespace SciSharp.Models.ObjectDetection
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            var gradients = tape.gradient(total_loss, model.trainable_variables);
-            optimizer.apply_gradients(zip(gradients, model.trainable_variables.Select(x => x as ResourceVariable)));
+            var gradients = tape.gradient(total_loss, model.TrainableVariables);
+            optimizer.apply_gradients(zip(gradients, model.TrainableVariables.Select(x => x as ResourceVariable)));
 
             float lr = optimizer.lr.numpy();
             print($"=> STEP {global_steps:D4}/{total_steps:D4} lr:{lr} giou_loss: {giou_loss.numpy()} conf_loss: {conf_loss.numpy()} prob_loss: {prob_loss.numpy()} total_loss: {total_loss.numpy()}");
