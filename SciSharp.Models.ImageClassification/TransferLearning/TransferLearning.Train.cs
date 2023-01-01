@@ -153,10 +153,10 @@ namespace SciSharp.Models.ImageClassification
         (Tensor, Tensor, bool) create_module_graph(Graph graph)
         {
             tf.train.import_meta_graph("graph/InceptionV3.meta");
-            Tensor resized_input_tensor = graph.OperationByName(input_tensor_name); 
+            Tensor resized_image_tensor = graph.OperationByName(input_tensor_name); 
             Tensor bottleneck_tensor = graph.OperationByName("module_apply_default/hub_output/feature_vector/SpatialSqueeze");
             var wants_quantization = false;
-            return (bottleneck_tensor, resized_input_tensor, wants_quantization);
+            return (bottleneck_tensor, resized_image_tensor, wants_quantization);
         }
     }
 }

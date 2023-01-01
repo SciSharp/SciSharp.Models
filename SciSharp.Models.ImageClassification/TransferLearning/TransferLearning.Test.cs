@@ -23,6 +23,11 @@ namespace SciSharp.Models.ImageClassification
 
             using var graph = tf.Graph().as_default();
             graph.Import(_options.ModelPath);
+
+            resized_image_tensor = graph.OperationByName(input_tensor_name);
+            bottleneck_tensor = graph.OperationByName("module_apply_default/hub_output/feature_vector/SpatialSqueeze");
+            wants_quantization = false;
+
             var (jpeg_data_tensor, decoded_image_tensor) = add_jpeg_decoding();
 
             using var sess = tf.Session(graph);
