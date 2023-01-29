@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -42,7 +42,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\SharpCV\src\SharpCV\SharpCV.csproj" />
+    <PackageReference Include="SharpCV" Version="0.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
   </ItemGroup>
 

@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.1.0</Version>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <Version>0.2.0</Version>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
@@ -17,7 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Pandas.NET\src\Pandas.NET\Pandas.Net.csproj" />
+    <PackageReference Include="Pandas.NET" Version="0.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
   </ItemGroup>
 

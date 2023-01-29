@@ -9,5 +9,6 @@ namespace SciSharp.Models
         public IImageClassificationTask ImageClassificationTask { get; set; }
         public IObjectDetectionTask ObjectDetectionTask { get; set; }
         public ITimeSeriesTask TimeSeriesTask { get; set; }
+        public ITextGenerationTask TextGenerationTask { get; set; }
     }
 }

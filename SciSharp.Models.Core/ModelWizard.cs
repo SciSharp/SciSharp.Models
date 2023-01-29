@@ -36,5 +36,13 @@ namespace SciSharp.Models
             _context.TimeSeriesTask.Config(options);
             return _context.TimeSeriesTask;
         }
+
+        public ITextGenerationTask AddTextGenerationTask<T>(TaskOptions options)
+            where T : ITextGenerationTask, new()
+        {
+            _context.TextGenerationTask = new T();
+            _context.TextGenerationTask.Config(options);
+            return _context.TextGenerationTask;
+        }
     }
 }

@@ -11,12 +11,14 @@ namespace SciSharp.Models.TimeSeries
     {
         protected override Model BuildModel()
         {
-            var model = keras.Sequential(new List<ILayer>
+            var layers = new List<ILayer>
             {
                 keras.layers.Conv1D(filters: 32, kernel_size: _args.InputWidth, activation: "relu"),
                 keras.layers.Dense(units: 32, activation: "relu"),
                 keras.layers.Dense(units: 1)
-            });
+            };
+
+            var model = keras.Sequential(layers);
 
             /*early_stopping = keras.callbacks.EarlyStopping(monitor = "val_loss",
                                                   patience = patience,
