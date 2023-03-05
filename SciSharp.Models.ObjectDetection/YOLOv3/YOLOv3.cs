@@ -30,7 +30,7 @@ namespace SciSharp.Models.ObjectDetection
         Tensor pred_mbbox;
         Tensor pred_lbbox;
 
-        OptimizerV2 optimizer;
+        IOptimizer optimizer;
         int global_steps;
         int warmup_steps;
         int total_steps;
@@ -272,7 +272,7 @@ namespace SciSharp.Models.ObjectDetection
                 output_tensors.Add(pred_tensor);
             }
 
-            Model model = keras.Model(input_layer, output_tensors);
+            var model = keras.Model(input_layer, output_tensors);
             model.summary();
 
             // download wights from https://drive.google.com/file/d/1J5N5Pqf1BG1sN_GWDzgViBcdK2757-tS/view?usp=sharing
@@ -310,7 +310,7 @@ namespace SciSharp.Models.ObjectDetection
         /// </summary>
         /// <param name="image_data"></param>
         /// <param name="targets"></param>
-        Tensor TrainStep(Model model, NDArray image_data, List<LabelBorderBox> targets)
+        Tensor TrainStep(IModel model, NDArray image_data, List<LabelBorderBox> targets)
         {
             using var tape = tf.GradientTape();
             var pred_result = model.Apply(image_data, training: true);
@@ -337,7 +337,7 @@ namespace SciSharp.Models.ObjectDetection
             var gradients = tape.gradient(total_loss, model.TrainableVariables);
             optimizer.apply_gradients(zip(gradients, model.TrainableVariables.Select(x => x as ResourceVariable)));
 
-            float lr = optimizer.lr.numpy();
+            float lr = 1e-4f;// optimizer.lr.numpy();
             print($"=> STEP {global_steps:D4}/{total_steps:D4} lr:{lr} giou_loss: {giou_loss.numpy()} conf_loss: {conf_loss.numpy()} prob_loss: {prob_loss.numpy()} total_loss: {total_loss.numpy()}");
             global_steps++;
 
@@ -351,7 +351,7 @@ namespace SciSharp.Models.ObjectDetection
                 lr = (cfg.TRAIN.LEARN_RATE_END + 0.5f * (cfg.TRAIN.LEARN_RATE_INIT - cfg.TRAIN.LEARN_RATE_END) *
                     (1 + tf.cos((global_steps - warmup_steps + 0f) / (total_steps - warmup_steps) * (float)np.pi))).numpy();
             }
-            optimizer.lr.assign(lr);
+            // optimizer.lr.assign(lr);
 
             return total_loss;
         }

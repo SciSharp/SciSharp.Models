@@ -13,7 +13,7 @@ namespace SciSharp.Models.ImageClassification
         public void Train(TrainingOptions options)
         {
             var graphBuiltResult = BuildGraph(options);
-            using var sess = tf.Session(graphBuiltResult.Graph);
+            var sess = tf.Session(graphBuiltResult.Graph);
 
             // Number of training iterations in each epoch
             var num_tr_iter = len(options.TrainingData.Features) / options.BatchSize;

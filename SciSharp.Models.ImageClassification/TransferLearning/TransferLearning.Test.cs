@@ -21,7 +21,7 @@ namespace SciSharp.Models.ImageClassification
 
             image_dataset = LoadDataFromDir(_options.DataDir, testingPercentage: 1.0f, validationPercentage: 0);
 
-            using var graph = tf.Graph().as_default();
+            var graph = tf.Graph().as_default();
             graph.Import(_options.ModelPath);
 
             resized_image_tensor = graph.OperationByName(input_tensor_name);
@@ -30,7 +30,7 @@ namespace SciSharp.Models.ImageClassification
 
             var (jpeg_data_tensor, decoded_image_tensor) = add_jpeg_decoding();
 
-            using var sess = tf.Session(graph);
+            var sess = tf.Session(graph);
 
             var (test_accuracy, predictions) = run_final_eval(sess, image_dataset,
                            jpeg_data_tensor, decoded_image_tensor, resized_image_tensor,

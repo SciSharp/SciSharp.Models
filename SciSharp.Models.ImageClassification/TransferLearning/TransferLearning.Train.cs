@@ -43,8 +43,8 @@ namespace SciSharp.Models.ImageClassification
                 validationPercentage: _options.ValidationPercentage);
 
             var sw = new Stopwatch();
-            using var graph = isImportingGraph ? ImportGraph() : BuildGraph();
-            using var sess = tf.Session(graph);
+            var graph = isImportingGraph ? ImportGraph() : BuildGraph();
+            var sess = tf.Session(graph);
             
             // Initialize all weights: for the module to their pretrained values,
             // and for the newly added retraining layer to random initial values.

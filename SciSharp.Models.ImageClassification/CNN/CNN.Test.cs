@@ -14,10 +14,10 @@ namespace SciSharp.Models.ImageClassification
         {
             var result = new ModelTestResult();
 
-            using var graph = tf.Graph().as_default();
+            var graph = tf.Graph().as_default();
             graph.Import(_options.ModelPath);
 
-            using var sess = tf.Session(graph);
+            var sess = tf.Session(graph);
 
             Tensor loss = graph.OperationByName("Train/Loss/loss");
             Tensor accuracy = graph.OperationByName("Train/Accuracy/accuracy");

@@ -5,7 +5,10 @@
 .vs
 bin
 obj
-/SciSharp.Models.YOLOv3/data/dataset/train
-/SciSharp.Models.YOLOv3/data/dataset/test
+log
+*.h5
+__pycache__
 /SciSharp.Models.YOLOv3/data
 /SciSharp.Models.AudioRecognition/audio_recognition_py/data
+/SciSharp.Models.ObjectDetection/YOLOv3/python/mAP
+/SciSharp.Models.ObjectDetection/YOLOv3/data

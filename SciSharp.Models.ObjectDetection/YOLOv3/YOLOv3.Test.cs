@@ -24,7 +24,7 @@ namespace SciSharp.Models.ObjectDetection
                 var bbox_tensor = yolo.Decode(fm, i);
                 bbox_tensors.Add(bbox_tensor);
             }
-            Model model = keras.Model(input_layer, bbox_tensors);
+            var model = tf.keras.Model(input_layer, bbox_tensors);
 
             model.load_weights("./YOLOv3/yolov3.h5");
 
@@ -67,7 +67,7 @@ namespace SciSharp.Models.ObjectDetection
 
                 image_data = image_data[np.newaxis, Slice.Ellipsis];
                 var pred_bbox = model.predict(image_data);
-                pred_bbox = pred_bbox.Select(x => tf.reshape(x, new object[] { -1, tf.shape(x)[-1] })).ToList();
+                pred_bbox = pred_bbox.Select(x => tf.reshape(x, (-1, x.shape[-1]))).ToList();
                 var pred_bbox_concat = tf.concat(pred_bbox, axis: 0);
                 var bboxes = Utils.postprocess_boxes(pred_bbox_concat.numpy(), image_size, cfg.TEST.INPUT_SIZE[0], cfg.TEST.SCORE_THRESHOLD);
                 if (bboxes.size > 0)
