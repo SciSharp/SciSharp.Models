@@ -18,10 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pandas.NET" Version="0.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\Pandas.NET\src\Pandas.NET\Pandas.NET.csproj" />
     <ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
   </ItemGroup>
