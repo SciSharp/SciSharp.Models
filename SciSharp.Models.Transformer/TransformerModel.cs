@@ -24,7 +24,7 @@ namespace SciSharp.Models.Transformer
         ILayer dropout2;
         ILayer output;
 
-        public TransformerModel() 
+        public TransformerModel()
         {
             cfg = new TransformerConfig();
             dataloader = new TransformerDataset();
@@ -39,7 +39,7 @@ namespace SciSharp.Models.Transformer
         }
         void Init()
         {
-            embedding_layer = new TokenAndPositionEmbedding(cfg.DatasetConfig.maxlen, cfg.DatasetConfig.vocab_size, cfg.Transformer.embed_dim);
+            embedding_layer = new TokenAndPositionEmbedding(new TokenAndPositionEmbeddingArgs { Maxlen = cfg.DatasetConfig.maxlen, VocabSize = cfg.DatasetConfig.vocab_size, EmbedDim = cfg.Transformer.embed_dim });
             //transformer_block = new TransformerBlock(cfg.Transformer.embed_dim, cfg.Transformer.num_heads, cfg.Transformer.ff_dim);
             //pooling = keras.layers.GlobalAveragePooling1D();
             //dropout1 = keras.layers.Dropout(cfg.Transformer.dropout_rate);
@@ -79,6 +79,6 @@ namespace SciSharp.Models.Transformer
             model.compile(optimizer: "adam", loss: "sparse_categorical_crossentropy", metrics: new string[] { "accuracy" });
             var history = model.fit((NDArray)x_train, (NDArray)y_train, batch_size: cfg.TRAIN.batch_size, epochs: cfg.TRAIN.epochs, validation_data: ((Tensorflow.NumPy.NDArray val_x, Tensorflow.NumPy.NDArray val_y))(x_val, y_val));
             return history;
-        } 
+        }
     }
 }
