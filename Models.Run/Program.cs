@@ -8,23 +8,12 @@ namespace Models.Run
         static void Main(string[] args)
         {
             Run();
-
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-
-            Console.WriteLine("Completed.");
-            Console.ReadLine();
         }
 
         static void Run()
         {
-            //var sample = new SampleBinaryTextClassification();
-
-            //var ar = new SampleAudioRecognition();
-            //ar.LoadModel("simple_audio_model");
-
-            // var transformer = new SampleTransformer();
-            // transformer.Run();
+            var wp = new WeatherPrediction();
+            wp.Run();
         }
     }
 }

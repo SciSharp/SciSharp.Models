@@ -21,7 +21,7 @@ namespace SciSharp.Models.TimeSeries
             var ds = preprocess();
             if (ds is DataFrame df)
             {
-                _window = new WindowGenerator(input_width: _args.InputWidth, label_width: 1, shift: 1,
+                _window = new WindowGenerator(input_width: _args.InputWidth, label_width: 24, shift: 1,
                     columns: df.columns,
                     label_columns: _args.LabelColumns);
 
