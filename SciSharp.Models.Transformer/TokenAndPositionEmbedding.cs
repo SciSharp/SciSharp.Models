@@ -22,11 +22,12 @@ namespace SciSharp.Models.Transformer
 
         public Tensor Apply(Tensor x)
         {
-            var maxlen = tf.shape(x)[-1];
-            var positions = tf.range(start: 0, limit: maxlen, delta: 1);
-            positions = pos_emb.Apply(positions);
-            x = token_emb.Apply(x);
-            return x + positions;
+            //var maxlen = tf.shape(x)[-1];
+            //var positions = tf.range(start: 0, limit: maxlen, delta: 1);
+            //positions = pos_emb.Apply(positions);
+            //var embedding = token_emb.Apply(x);
+            //var output = embedding + positions;
+            return token_emb.Apply(x);
         }
     }
 }
