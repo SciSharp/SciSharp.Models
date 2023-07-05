@@ -15,13 +15,13 @@ namespace SciSharp.Models.Transformer
         TransformerConfig cfg;
         TransformerDataset dataloader;
 
-        TokenAndPositionEmbedding embedding_layer;
-        ILayer reshape;
-        TransformerBlock transformer_block;
+        ILayer embedding_layer;
+        ILayer transformer_block;
         ILayer pooling;
         ILayer dropout1;
         ILayer dense;
         ILayer dropout2;
+        ILayer reshape;
         ILayer output;
 
         public TransformerModel()
@@ -40,7 +40,7 @@ namespace SciSharp.Models.Transformer
         void Init()
         {
             embedding_layer = new TokenAndPositionEmbedding(new TokenAndPositionEmbeddingArgs { Maxlen = cfg.DatasetConfig.maxlen, VocabSize = cfg.DatasetConfig.vocab_size, EmbedDim = cfg.Transformer.embed_dim });
-            //transformer_block = new TransformerBlock(cfg.Transformer.embed_dim, cfg.Transformer.num_heads, cfg.Transformer.ff_dim);
+            transformer_block = new TransformerBlock(new TransformerBlockArgs { EmbedDim = cfg.Transformer.embed_dim, NumHeads = cfg.Transformer.num_heads, FfDim = cfg.Transformer.ff_dim });
             //pooling = keras.layers.GlobalAveragePooling1D();
             //dropout1 = keras.layers.Dropout(cfg.Transformer.dropout_rate);
             //dense = keras.layers.Dense(cfg.Transformer.dense_dim, activation: "relu");
@@ -51,13 +51,13 @@ namespace SciSharp.Models.Transformer
         public Tensor Apply(Tensor inputs)
         {
             var embeddings = embedding_layer.Apply(inputs);
-            embeddings = reshape.Apply(embeddings);
-            //var outputs = transformer_block.Apply(inputs);
+            var outputs = transformer_block.Apply(embeddings);
             //outputs = pooling.Apply(outputs);
             //outputs = dropout1.Apply(outputs);
             //outputs = dense.Apply(outputs);
             //outputs = dropout2.Apply(outputs);
-            var outputs = output.Apply(embeddings);
+            outputs = reshape.Apply(outputs);
+            outputs = output.Apply(outputs);
             return outputs;
         }
         public IModel Build()

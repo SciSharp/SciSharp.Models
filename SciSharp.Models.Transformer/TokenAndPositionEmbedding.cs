@@ -49,11 +49,11 @@ namespace SciSharp.Models.Transformer
             StackLayers(token_emb, pos_emb, add);
         }
 
-        protected override Tensors Call(Tensors inputs, Tensors state = null, bool? training = null, IOptionalArgs? optional_args = null)
+        protected override Tensors Call(Tensors inputs, Tensors state = null, bool? training = false, IOptionalArgs? optional_args = null)
         {
-            var embedding = token_emb.Apply(inputs);
-            var positions = pos_emb.Apply(positions_base);
-            var output = add.Apply(new Tensors(embedding, positions));
+            var embedding = token_emb.Apply(inputs, state, training?? false, optional_args);
+            var positions = pos_emb.Apply(positions_base, state, training ?? false, optional_args);
+            var output = add.Apply(new Tensors(embedding, positions), state, training ?? false, optional_args);
             return output;
         }
     }
