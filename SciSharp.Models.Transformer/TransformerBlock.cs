@@ -8,7 +8,6 @@ using Tensorflow.Keras;
 using Tensorflow.Keras.ArgsDefinition;
 using Tensorflow.Keras.Engine;
 using Tensorflow.Keras.Saving;
-using static Tensorflow.Binding;
 using static Tensorflow.KerasApi;
 
 namespace SciSharp.Models.Transformer
@@ -60,15 +59,15 @@ namespace SciSharp.Models.Transformer
         }
         protected override Tensors Call(Tensors inputs, Tensors state = null, bool? training = null, IOptionalArgs? optional_args = null)
         {
-            var att_output = att.Apply(new Tensors(inputs, inputs), state, training?? false, optional_args);
-            att_output = dropout1.Apply(att_output, state, training?? false, optional_args);
-            var residual = add1.Apply(new Tensors(inputs, att_output), state, training?? false, optional_args);
-            var out1 = layernorm1.Apply(residual, state, training?? false, optional_args);
-            var ffn_output = ffn1.Apply(out1, state, training?? false, optional_args);
-            ffn_output = ffn2.Apply(ffn_output, state, training?? false, optional_args);
-            ffn_output = dropout2.Apply(ffn_output, state, training?? false, optional_args);
-            var output = add2.Apply(new Tensors(out1, ffn_output), state, training?? false, optional_args);
-            output = layernorm2.Apply(output, state, training?? false, optional_args);
+            var att_output = att.Apply(new Tensors(inputs, inputs), state, training ?? false, optional_args);
+            att_output = dropout1.Apply(att_output, state, training ?? false, optional_args);
+            var residual = add1.Apply(new Tensors(inputs, att_output), state, training ?? false, optional_args);
+            var out1 = layernorm1.Apply(residual, state, training ?? false, optional_args);
+            var ffn_output = ffn1.Apply(out1, state, training ?? false, optional_args);
+            ffn_output = ffn2.Apply(ffn_output, state, training ?? false, optional_args);
+            ffn_output = dropout2.Apply(ffn_output, state, training ?? false, optional_args);
+            var output = add2.Apply(new Tensors(out1, ffn_output), state, training ?? false, optional_args);
+            output = layernorm2.Apply(output, state, training ?? false, optional_args);
             return output;
         }
     }

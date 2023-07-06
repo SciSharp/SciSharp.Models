@@ -33,7 +33,7 @@ namespace SciSharp.Models.Transformer
 
         public Tensor[] GetData()
         {
-            var dataset = keras.datasets.imdb.load_data(maxlen: cfg.DatasetConfig.maxlen);      
+            var dataset = keras.datasets.imdb.load_data(maxlen: cfg.DatasetConfig.maxlen);
             var x_train = dataset.Train.Item1.astype(np.float32);
             var y_train = dataset.Train.Item2.astype(np.float32);
             var x_val = dataset.Test.Item1.astype(np.float32);

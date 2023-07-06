@@ -51,7 +51,7 @@ namespace SciSharp.Models.Transformer
 
         protected override Tensors Call(Tensors inputs, Tensors state = null, bool? training = false, IOptionalArgs? optional_args = null)
         {
-            var embedding = token_emb.Apply(inputs, state, training?? false, optional_args);
+            var embedding = token_emb.Apply(inputs, state, training ?? false, optional_args);
             var positions = pos_emb.Apply(positions_base, state, training ?? false, optional_args);
             var output = add.Apply(new Tensors(embedding, positions), state, training ?? false, optional_args);
             return output;
