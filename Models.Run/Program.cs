@@ -12,8 +12,10 @@ namespace Models.Run
 
         static void Run()
         {
-            var wp = new WeatherPrediction();
-            wp.Run();
+            //var wp = new WeatherPrediction();
+            //wp.Run();
+            var st = new SampleTransformer();
+            st.Run();
         }
     }
 }

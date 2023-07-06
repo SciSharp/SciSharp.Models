@@ -8,14 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.4.0.20200915" />
-    <PackageReference Include="SciSharp.TensorFlow.Redist-Windows-GPU" Version="2.10.1" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.7.0.20230115" />
+    <PackageReference Include="SciSharp.TensorFlow.Redist-Windows-GPU" Version="2.10.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SciSharp.Models.ObjectDetection\SciSharp.Models.ObjectDetection.csproj" />
     <ProjectReference Include="..\SciSharp.Models.TextClassification\SciSharp.Models.TextClassification.csproj" />
     <ProjectReference Include="..\SciSharp.Models.TimeSeries\SciSharp.Models.TimeSeries.csproj" />
+    <ProjectReference Include="..\SciSharp.Models.Transformer\SciSharp.Models.Transformer.csproj" />
   </ItemGroup>
 
 </Project>
