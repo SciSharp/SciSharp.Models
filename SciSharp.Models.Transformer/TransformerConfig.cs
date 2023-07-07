@@ -30,7 +30,7 @@ namespace SciSharp.Models.Transformer
             public int num_heads = 2;  // Number of attention heads
             public int ff_dim = 32;    // Hidden layer size in feed forward network inside transformer
             public float dropout_rate = 0.1f; // Dropout rate
-            public int dense_dim = 10;
+            public int dense_dim = 20;
         }
 
         public class TrainConfig

@@ -13,7 +13,7 @@ using static Tensorflow.KerasApi;
 
 namespace SciSharp.Models.Transformer
 {
-    public class TokenAndPositionEmbeddingArgs : Tensorflow.Keras.ArgsDefinition.AutoSerializeLayerArgs
+    public class TokenAndPositionEmbeddingArgs : AutoSerializeLayerArgs
     {
         public int Maxlen { get; set; }
         public int VocabSize { get; set; }
@@ -26,7 +26,6 @@ namespace SciSharp.Models.Transformer
         Tensor positions_base;
         ILayer token_emb;
         ILayer pos_emb;
-        ILayer add;
 
         public TokenAndPositionEmbedding(TokenAndPositionEmbeddingArgs args)
             : base(new LayerArgs
@@ -45,16 +44,14 @@ namespace SciSharp.Models.Transformer
             positions_base = tf.range(start: 0, limit: args.Maxlen, delta: 1);
             token_emb = keras.layers.Embedding(input_dim: args.VocabSize, output_dim: args.EmbedDim);
             pos_emb = keras.layers.Embedding(input_dim: args.Maxlen, output_dim: args.EmbedDim);
-            add = keras.layers.Add();
-            StackLayers(token_emb, pos_emb, add);
+            StackLayers(token_emb, pos_emb);
         }
 
         protected override Tensors Call(Tensors inputs, Tensors state = null, bool? training = false, IOptionalArgs? optional_args = null)
         {
             var embedding = token_emb.Apply(inputs, state, training ?? false, optional_args);
             var positions = pos_emb.Apply(positions_base, state, training ?? false, optional_args);
-            var output = add.Apply(new Tensors(embedding, positions), state, training ?? false, optional_args);
-            return output;
+            return (Tensor)embedding + (Tensor)positions;
         }
     }
 }

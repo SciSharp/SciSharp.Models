@@ -12,7 +12,7 @@ using static Tensorflow.KerasApi;
 
 namespace SciSharp.Models.Transformer
 {
-    public class TransformerArgs : Tensorflow.Keras.ArgsDefinition.AutoSerializeLayerArgs
+    public class TransformerArgs : AutoSerializeLayerArgs
     {
         public int Maxlen { get; set; }
         public int VocabSize { get; set; }
@@ -95,7 +95,7 @@ namespace SciSharp.Models.Transformer
             var y_val = dataset[3];
             var model = Build(cfg);
             model.summary();
-            model.compile(optimizer: "adam", loss: "sparse_categorical_crossentropy", metrics: new string[] { "accuracy" });
+            model.compile(optimizer: keras.optimizers.Adam(learning_rate: 0.01f), loss: keras.losses.SparseCategoricalCrossentropy(), metrics: new string[] { "accuracy" });
             var history = model.fit((NDArray)x_train, (NDArray)y_train, batch_size: cfg.TRAIN.batch_size, epochs: cfg.TRAIN.epochs, validation_data: ((NDArray val_x, NDArray val_y))(x_val, y_val));
             return history;
         }
