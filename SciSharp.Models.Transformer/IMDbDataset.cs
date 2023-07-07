@@ -10,30 +10,30 @@ using static Tensorflow.KerasApi;
 
 namespace SciSharp.Models.Transformer
 {
-    public class TransformerDataset
+    public class IMDbDataset
     {
-        TransformerConfig cfg;
+        TransformerClassificationConfig cfg;
 
-        public TransformerDataset()
+        public IMDbDataset()
         {
-            cfg = new TransformerConfig();
+            cfg = new TransformerClassificationConfig();
         }
 
-        public TransformerDataset(TransformerConfig config)
+        public IMDbDataset(TransformerClassificationConfig config)
         {
             cfg = config;
         }
 
-        public TransformerDataset(int vocab_size, int maxlen)
+        public IMDbDataset(int vocab_size, int maxlen)
         {
-            cfg = new TransformerConfig();
-            cfg.DatasetConfig.vocab_size = vocab_size;
-            cfg.DatasetConfig.maxlen = maxlen;
+            cfg = new TransformerClassificationConfig();
+            cfg.DatasetCfg.vocab_size = vocab_size;
+            cfg.DatasetCfg.maxlen = maxlen;
         }
 
         public Tensor[] GetData()
         {
-            var dataset = keras.datasets.imdb.load_data(maxlen: cfg.DatasetConfig.maxlen);
+            var dataset = keras.datasets.imdb.load_data(maxlen: cfg.DatasetCfg.maxlen);
             var x_train = dataset.Train.Item1.astype(np.float32);
             var y_train = dataset.Train.Item2.astype(np.float32);
             var x_val = dataset.Test.Item1.astype(np.float32);

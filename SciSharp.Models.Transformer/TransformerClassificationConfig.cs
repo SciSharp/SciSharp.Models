@@ -5,26 +5,26 @@ using System.Text;
 
 namespace SciSharp.Models.Transformer
 {
-    public class TransformerConfig
+    public class TransformerClassificationConfig
     {
-        public TransformerDatasetConfig DatasetConfig;
-        public TransformerModelConfig Transformer;
-        public TrainConfig TRAIN;
+        public DatasetConfig DatasetCfg;
+        public ModelConfig ModelCfg;
+        public TrainConfig TrainCfg;
 
-        public TransformerConfig()
+        public TransformerClassificationConfig()
         {
-            DatasetConfig = new TransformerDatasetConfig();
-            Transformer = new TransformerModelConfig();
-            TRAIN = new TrainConfig();
+            DatasetCfg = new DatasetConfig();
+            ModelCfg = new ModelConfig();
+            TrainCfg = new TrainConfig();
         }
 
-        public class TransformerDatasetConfig
+        public class DatasetConfig
         {
             public int vocab_size = 20000; // Only consider the top 20k words
             public int maxlen = 200; // Only consider the first 200 words of each movie review
         }
 
-        public class TransformerModelConfig
+        public class ModelConfig
         {
             public int embed_dim = 32; // Embedding size for each token
             public int num_heads = 2;  // Number of attention heads

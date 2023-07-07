@@ -53,5 +53,11 @@ namespace SciSharp.Models.Transformer
             var positions = pos_emb.Apply(positions_base, state, training ?? false, optional_args);
             return (Tensor)embedding + (Tensor)positions;
         }
+
+        public Tensors ComputeMask(Tensors inputs, Tensor? mask = null)
+        {
+            mask = mask ?? new Tensors(0);
+            return math_ops.not_equal(inputs, mask);
+        }
     }
 }

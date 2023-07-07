@@ -13,7 +13,7 @@ namespace Models.Run
     {
         public void Run()
         {
-            Transformer.Train(null);
+            TransformerClassification.Train(null);
         }
     }
 }

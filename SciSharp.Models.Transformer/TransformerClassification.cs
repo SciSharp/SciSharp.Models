@@ -12,7 +12,7 @@ using static Tensorflow.KerasApi;
 
 namespace SciSharp.Models.Transformer
 {
-    public class TransformerArgs : AutoSerializeLayerArgs
+    public class TransformerClassificationArgs : AutoSerializeLayerArgs
     {
         public int Maxlen { get; set; }
         public int VocabSize { get; set; }
@@ -23,9 +23,9 @@ namespace SciSharp.Models.Transformer
         public int DenseDim { get; set; }
         public override IRegularizer ActivityRegularizer { get => base.ActivityRegularizer; set => base.ActivityRegularizer = value; }
     }
-    public class Transformer : Layer
+    public class TransformerClassification : Layer
     {
-        TransformerArgs args;
+        TransformerClassificationArgs args;
         ILayer embedding_layer;
         ILayer transformer_block;
         ILayer pooling;
@@ -34,7 +34,7 @@ namespace SciSharp.Models.Transformer
         ILayer dropout2;
         ILayer output;
 
-        public Transformer(TransformerArgs args)
+        public TransformerClassification(TransformerClassificationArgs args)
              : base(new LayerArgs
              {
                  DType = args.DType,
@@ -67,27 +67,27 @@ namespace SciSharp.Models.Transformer
             outputs = output.Apply(outputs);
             return outputs;
         }
-        public static IModel Build(TransformerConfig cfg)
+        public static IModel Build(TransformerClassificationConfig cfg)
         {
-            var inputs = keras.layers.Input(shape: new[] { cfg.DatasetConfig.maxlen });
-            var transformer = new Transformer(
-                new TransformerArgs
+            var inputs = keras.layers.Input(shape: new[] { cfg.DatasetCfg.maxlen });
+            var transformer = new TransformerClassification(
+                new TransformerClassificationArgs
                 {
-                    Maxlen = cfg.DatasetConfig.maxlen,
-                    VocabSize = cfg.DatasetConfig.vocab_size,
-                    EmbedDim = cfg.Transformer.embed_dim,
-                    FfDim = cfg.Transformer.ff_dim,
-                    DropoutRate = cfg.Transformer.dropout_rate,
-                    DenseDim = cfg.Transformer.dense_dim
+                    Maxlen = cfg.DatasetCfg.maxlen,
+                    VocabSize = cfg.DatasetCfg.vocab_size,
+                    EmbedDim = cfg.ModelCfg.embed_dim,
+                    FfDim = cfg.ModelCfg.ff_dim,
+                    DropoutRate = cfg.ModelCfg.dropout_rate,
+                    DenseDim = cfg.ModelCfg.dense_dim
                 });
             var outputs = transformer.Apply(inputs);
             return keras.Model(inputs: inputs, outputs: outputs);
         }
 
-        public static ICallback Train(TransformerConfig? cfg)
+        public static ICallback Train(TransformerClassificationConfig? cfg)
         {
-            cfg = cfg ?? new TransformerConfig();
-            var dataloader = new TransformerDataset(cfg);
+            cfg = cfg ?? new TransformerClassificationConfig();
+            var dataloader = new IMDbDataset(cfg);
             var dataset = dataloader.GetData();
             var x_train = dataset[0];
             var y_train = dataset[1];
@@ -96,7 +96,7 @@ namespace SciSharp.Models.Transformer
             var model = Build(cfg);
             model.summary();
             model.compile(optimizer: keras.optimizers.Adam(learning_rate: 0.01f), loss: keras.losses.SparseCategoricalCrossentropy(), metrics: new string[] { "accuracy" });
-            var history = model.fit((NDArray)x_train, (NDArray)y_train, batch_size: cfg.TRAIN.batch_size, epochs: cfg.TRAIN.epochs, validation_data: ((NDArray val_x, NDArray val_y))(x_val, y_val));
+            var history = model.fit((NDArray)x_train, (NDArray)y_train, batch_size: cfg.TrainCfg.batch_size, epochs: cfg.TrainCfg.epochs, validation_data: ((NDArray val_x, NDArray val_y))(x_val, y_val));
             return history;
         }
     }
