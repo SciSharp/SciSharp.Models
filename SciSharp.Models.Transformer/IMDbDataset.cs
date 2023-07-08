@@ -19,9 +19,9 @@ namespace SciSharp.Models.Transformer
             cfg = new TransformerClassificationConfig();
         }
 
-        public IMDbDataset(TransformerClassificationConfig config)
+        public IMDbDataset(TransformerClassificationConfig cfg)
         {
-            cfg = config;
+            this.cfg = cfg;
         }
 
         public IMDbDataset(int vocab_size, int maxlen)
