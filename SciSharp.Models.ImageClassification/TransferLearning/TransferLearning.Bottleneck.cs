@@ -65,7 +65,7 @@ namespace SciSharp.Models.ImageClassification
                                        decoded_image_tensor, resized_input_tensor,
                                        bottleneck_tensor);
             var bottleneck_string = File.ReadAllText(bottleneck_path);
-            var bottleneck_values = Array.ConvertAll(bottleneck_string.Split('|'), x => float.Parse(x));
+            var bottleneck_values = Array.ConvertAll(bottleneck_string.Split(' '), x => float.Parse(x));
             return bottleneck_values;
         }
 
@@ -84,7 +84,7 @@ namespace SciSharp.Models.ImageClassification
                 sess, image_data, jpeg_data_tensor, decoded_image_tensor,
                 resized_input_tensor, bottleneck_tensor);
             var values = bottleneck_values.ToArray<float>();
-            var bottleneck_string = string.Join("|", values);
+            var bottleneck_string = string.Join(" ", values);
             File.WriteAllText(bottleneck_path, bottleneck_string);
             return values;
         }
