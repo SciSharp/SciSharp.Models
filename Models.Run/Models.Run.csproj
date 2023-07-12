@@ -16,6 +16,7 @@
     <ProjectReference Include="..\SciSharp.Models.ObjectDetection\SciSharp.Models.ObjectDetection.csproj" />
     <ProjectReference Include="..\SciSharp.Models.TextClassification\SciSharp.Models.TextClassification.csproj" />
     <ProjectReference Include="..\SciSharp.Models.TimeSeries\SciSharp.Models.TimeSeries.csproj" />
+    <ProjectReference Include="..\SciSharp.Models.Transformer\SciSharp.Models.Transformer.csproj" />
   </ItemGroup>
 
 </Project>
