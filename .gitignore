@@ -12,5 +12,4 @@ __pycache__
 /SciSharp.Models.AudioRecognition/audio_recognition_py/data
 /SciSharp.Models.ObjectDetection/YOLOv3/python/mAP
 /SciSharp.Models.ObjectDetection/YOLOv3/data
-/SciSharp.Models.Transformer/data
 
