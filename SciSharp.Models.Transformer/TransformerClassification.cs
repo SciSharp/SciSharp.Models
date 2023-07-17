@@ -84,7 +84,7 @@ namespace SciSharp.Models.Transformer
             return keras.Model(inputs: inputs, outputs: outputs);
         }
 
-        public static ICallback Train(TransformerClassificationConfig? cfg)
+        public static IModel Train(TransformerClassificationConfig? cfg)
         {
             cfg = cfg ?? new TransformerClassificationConfig();
             var dataloader = new IMDbDataset(cfg);
@@ -96,8 +96,18 @@ namespace SciSharp.Models.Transformer
             var model = Build(cfg);
             model.summary();
             model.compile(optimizer: keras.optimizers.Adam(learning_rate: 0.01f), loss: keras.losses.SparseCategoricalCrossentropy(), metrics: new string[] { "accuracy" });
-            var history = model.fit((NDArray)x_train, (NDArray)y_train, batch_size: cfg.TrainCfg.batch_size, epochs: cfg.TrainCfg.epochs, validation_data: ((NDArray val_x, NDArray val_y))(x_val, y_val));
-            return history;
+            model.fit((NDArray)x_train, (NDArray)y_train, batch_size: cfg.TrainCfg.batch_size, epochs: cfg.TrainCfg.epochs, validation_data: ((NDArray val_x, NDArray val_y))(x_val, y_val));
+            return model;
+        }
+
+        public static void Save(IModel model,  string path)
+        {
+            model.save(path, save_format: "tf");
+        }
+
+        public static IModel Load(string path)
+        {
+            return keras.models.load_model(path);
         }
     }
 }
