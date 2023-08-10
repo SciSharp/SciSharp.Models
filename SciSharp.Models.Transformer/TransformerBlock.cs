@@ -10,16 +10,8 @@ using Tensorflow.Keras.Engine;
 using Tensorflow.Keras.Saving;
 using static Tensorflow.KerasApi;
 
-namespace SciSharp.Models.Transformer
+namespace Tensorflow.Keras.Layers
 {
-    public class TransformerBlockArgs : AutoSerializeLayerArgs
-    {
-        public int EmbedDim { get; set; }
-        public int NumHeads { get; set; }
-        public int FfDim { get; set; }
-        public float DropoutRate { get; set; } = 0.1f;
-        public override IRegularizer ActivityRegularizer { get => base.ActivityRegularizer; set => base.ActivityRegularizer = value; }
-    }
     public class TransformerBlock : Layer
     {
         TransformerBlockArgs args;
@@ -31,19 +23,13 @@ namespace SciSharp.Models.Transformer
         ILayer dropout2;
         ILayer layernorm2;
 
-        public TransformerBlock(TransformerBlockArgs args)
-        : base(new LayerArgs
-        {
-            DType = args.DType,
-            Name = args.Name,
-            InputShape = args.InputShape,
-            BatchSize = args.BatchSize
-        })
+        public TransformerBlock(TransformerBlockArgs args) : base(args)
         {
             this.args = args;
         }
         public override void build(KerasShapesWrapper input_shape)
         {
+            _buildInputShape = input_shape;
             att = keras.layers.MultiHeadAttention(args.NumHeads, args.EmbedDim);
             dropout1 = keras.layers.Dropout(args.DropoutRate);
             layernorm1 = keras.layers.LayerNormalization(axis: -1, epsilon: 1e-6f);
@@ -52,6 +38,7 @@ namespace SciSharp.Models.Transformer
             dropout2 = keras.layers.Dropout(args.DropoutRate);
             layernorm2 = keras.layers.LayerNormalization(axis: -1, epsilon: 1e-6f);
             StackLayers(att, dropout1, layernorm1, ffn1, ffn2, dropout2, layernorm2);
+            built = true;
         }
         protected override Tensors Call(Tensors inputs, Tensors state = null, bool? training = null, IOptionalArgs? optional_args = null)
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using SciSharp.Models.Transformer;
 using Tensorflow;
 using Tensorflow.NumPy;
 using Tensorflow.Common.Types;
@@ -8,21 +9,11 @@ using Tensorflow.Keras;
 using Tensorflow.Keras.ArgsDefinition;
 using Tensorflow.Keras.Engine;
 using Tensorflow.Keras.Saving;
+using static Tensorflow.Binding;
 using static Tensorflow.KerasApi;
 
-namespace SciSharp.Models.Transformer
+namespace Tensorflow.Keras.Layers
 {
-    public class TransformerClassificationArgs : AutoSerializeLayerArgs
-    {
-        public int Maxlen { get; set; }
-        public int VocabSize { get; set; }
-        public int EmbedDim { get; set; }
-        public int NumHeads { get; set; }
-        public int FfDim { get; set; }
-        public float DropoutRate { get; set; } = 0.1f;
-        public int DenseDim { get; set; }
-        public override IRegularizer ActivityRegularizer { get => base.ActivityRegularizer; set => base.ActivityRegularizer = value; }
-    }
     public class TransformerClassification : Layer
     {
         TransformerClassificationArgs args;
@@ -34,19 +25,13 @@ namespace SciSharp.Models.Transformer
         ILayer dropout2;
         ILayer output;
 
-        public TransformerClassification(TransformerClassificationArgs args)
-             : base(new LayerArgs
-             {
-                 DType = args.DType,
-                 Name = args.Name,
-                 InputShape = args.InputShape,
-                 BatchSize = args.BatchSize
-             })
+        public TransformerClassification(TransformerClassificationArgs args) : base(args)
         {
             this.args = args;
         }
         public override void build(KerasShapesWrapper input_shape)
         {
+            _buildInputShape = input_shape;
             embedding_layer = new TokenAndPositionEmbedding(new TokenAndPositionEmbeddingArgs { Maxlen = args.Maxlen, VocabSize = args.VocabSize, EmbedDim = args.EmbedDim });
             transformer_block = new TransformerBlock(new TransformerBlockArgs { EmbedDim = args.EmbedDim, NumHeads = args.NumHeads, FfDim = args.FfDim });
             pooling = keras.layers.GlobalAveragePooling1D();
@@ -55,6 +40,7 @@ namespace SciSharp.Models.Transformer
             dropout2 = keras.layers.Dropout(args.DropoutRate);
             output = keras.layers.Dense(2, activation: "softmax");
             StackLayers(embedding_layer, transformer_block, pooling, dropout1, dense, dropout2, output);
+            built = true;
         }
         protected override Tensors Call(Tensors inputs, Tensors state = null, bool? training = null, IOptionalArgs? optional_args = null)
         {
@@ -84,10 +70,10 @@ namespace SciSharp.Models.Transformer
             return keras.Model(inputs: inputs, outputs: outputs);
         }
 
-        public static ICallback Train(TransformerClassificationConfig? cfg)
+        public static IModel Train(TransformerClassificationConfig? cfg)
         {
             cfg = cfg ?? new TransformerClassificationConfig();
-            var dataloader = new IMDbDataset(cfg);
+            var dataloader = new IMDbDataset(cfg); //the dataset is initially downloaded at TEMP dir, e.g., C:\Users\{user name}\AppData\Local\Temp\imdb\imdb.npz
             var dataset = dataloader.GetData();
             var x_train = dataset[0];
             var y_train = dataset[1];
@@ -96,8 +82,18 @@ namespace SciSharp.Models.Transformer
             var model = Build(cfg);
             model.summary();
             model.compile(optimizer: keras.optimizers.Adam(learning_rate: 0.01f), loss: keras.losses.SparseCategoricalCrossentropy(), metrics: new string[] { "accuracy" });
-            var history = model.fit((NDArray)x_train, (NDArray)y_train, batch_size: cfg.TrainCfg.batch_size, epochs: cfg.TrainCfg.epochs, validation_data: ((NDArray val_x, NDArray val_y))(x_val, y_val));
-            return history;
+            model.fit((NDArray)x_train, (NDArray)y_train, batch_size: cfg.TrainCfg.batch_size, epochs: cfg.TrainCfg.epochs, validation_data: ((NDArray val_x, NDArray val_y))(x_val, y_val));
+            return model;
+        }
+
+        public static void Save(IModel model,  string path)
+        {
+            model.save(path, save_format: "tf");
+        }
+
+        public static IModel Load(string path)
+        {
+            return tf.keras.models.load_model(path);
         }
     }
 }
