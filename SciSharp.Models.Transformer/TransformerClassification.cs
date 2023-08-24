@@ -69,7 +69,6 @@ namespace Tensorflow.Keras.Layers
             var outputs = transformer.Apply(inputs);
             return keras.Model(inputs: inputs, outputs: outputs);
         }
-
         public static IModel Train(TransformerClassificationConfig? cfg)
         {
             cfg = cfg ?? new TransformerClassificationConfig();
@@ -85,15 +84,31 @@ namespace Tensorflow.Keras.Layers
             model.fit((NDArray)x_train, (NDArray)y_train, batch_size: cfg.TrainCfg.batch_size, epochs: cfg.TrainCfg.epochs, validation_data: ((NDArray val_x, NDArray val_y))(x_val, y_val));
             return model;
         }
-
         public static void Save(IModel model,  string path)
         {
             model.save(path, save_format: "tf");
         }
-
         public static IModel Load(string path)
         {
             return tf.keras.models.load_model(path);
+        }
+        public static Tensors Predict(IModel model, Tensors inputs)
+        {
+            var outputs = model.predict(inputs);
+            return outputs;
+        }
+        public static void Evaluate(IModel model)
+        {
+            var cfg = new TransformerClassificationConfig();
+            var dataloader = new IMDbDataset(cfg); //the dataset is initially downloaded at TEMP dir, e.g., C:\Users\{user name}\AppData\Local\Temp\imdb\imdb.npz
+            var dataset = dataloader.GetData();
+            var x_train = dataset[0];
+            var y_train = dataset[1];
+            var x_val = dataset[2];
+            var y_val = dataset[3];
+            model.compile(optimizer: keras.optimizers.Adam(learning_rate: 0.01f), loss: keras.losses.SparseCategoricalCrossentropy(), metrics: new string[] { "accuracy" });
+            var log = model.evaluate((NDArray)x_val, (NDArray)y_val);
+            Console.WriteLine(log.ToString());
         }
     }
 }

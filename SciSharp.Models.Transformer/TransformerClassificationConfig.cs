@@ -36,7 +36,7 @@ namespace SciSharp.Models.Transformer
         public class TrainConfig
         {
             public int batch_size = 32;
-            public int epochs = 20;
+            public int epochs = 10;
         }
     }
 }
