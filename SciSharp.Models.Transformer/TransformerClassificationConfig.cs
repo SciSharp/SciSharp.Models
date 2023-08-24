@@ -22,6 +22,7 @@ namespace SciSharp.Models.Transformer
         {
             public int vocab_size = 20000; // Only consider the top 20k words
             public int maxlen = 200; // Only consider the first 200 words of each movie review
+            public string path = null; // Dataset Path
         }
 
         public class ModelConfig
