@@ -1,8 +1,8 @@
-﻿using SciSharp.Models.Transformer;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
-using static Tensorflow.KerasApi;
+using Tensorflow.Keras.Layers;
 
 namespace Models.Run
 {
@@ -13,7 +13,12 @@ namespace Models.Run
     {
         public void Run()
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             TransformerClassification.Train(null);
+            stopwatch.Stop();
+            TimeSpan elapsedTime = stopwatch.Elapsed;
+            Console.WriteLine("Elapsed time: {0} seconds", elapsedTime.TotalSeconds);
         }
     }
 }

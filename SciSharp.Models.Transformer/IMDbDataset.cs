@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using Tensorflow;
 using Tensorflow.NumPy;
@@ -18,22 +19,33 @@ namespace SciSharp.Models.Transformer
         {
             cfg = new TransformerClassificationConfig();
         }
-
         public IMDbDataset(TransformerClassificationConfig cfg)
         {
             this.cfg = cfg;
         }
-
         public IMDbDataset(int vocab_size, int maxlen)
         {
             cfg = new TransformerClassificationConfig();
             cfg.DatasetCfg.vocab_size = vocab_size;
             cfg.DatasetCfg.maxlen = maxlen;
         }
+        static string GetProjectRootDirectory(string currentDirectory)
+        {
+            DirectoryInfo directory = new DirectoryInfo(currentDirectory);
+            while (directory != null && !directory.GetFiles("*.sln").Any())
+            {
+                directory = directory.Parent;
+            }
+            return directory?.FullName;
+        }
 
         public Tensor[] GetData()
         {
-            var dataset = keras.datasets.imdb.load_data(maxlen: cfg.DatasetCfg.maxlen);
+            string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string projectRootDirectory = GetProjectRootDirectory(currentDirectory);
+            string dataPath = projectRootDirectory + @"\SciSharp.Models.Transformer\data";
+
+            var dataset = keras.datasets.imdb.load_data(path: cfg.DatasetCfg.path ?? dataPath, maxlen: cfg.DatasetCfg.maxlen);
             var x_train = dataset.Train.Item1.astype(np.float32);
             var y_train = dataset.Train.Item2.astype(np.float32);
             var x_val = dataset.Test.Item1.astype(np.float32);
