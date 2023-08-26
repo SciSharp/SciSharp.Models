@@ -16,9 +16,8 @@ namespace Tensorflow.Keras.Layers
     public class TokenAndPositionEmbedding : Layer
     {
         TokenAndPositionEmbeddingArgs args;
-        Tensor positions_base;
         ILayer token_emb;
-        ILayer pos_emb;
+        IVariableV1 position_embeddings;
 
         public TokenAndPositionEmbedding(TokenAndPositionEmbeddingArgs args) : base(args)
         {
@@ -28,24 +27,22 @@ namespace Tensorflow.Keras.Layers
         public override void build(KerasShapesWrapper input_shape)
         {
             _buildInputShape = input_shape;
-            positions_base = tf.constant(tf.range(start: 0, limit: args.Maxlen, delta: 1));
             token_emb = keras.layers.Embedding(input_dim: args.VocabSize, output_dim: args.EmbedDim);
-            pos_emb = keras.layers.Embedding(input_dim: args.Maxlen, output_dim: args.EmbedDim);
-            StackLayers(token_emb, pos_emb);
+            tf_with(ops.name_scope("position_embeddings"), scope =>
+            {
+                position_embeddings = add_weight(name: "position_embedding", shape: (args.Maxlen, args.EmbedDim));
+            });
+            StackLayers(token_emb);
             built = true;
         }
 
-        protected override Tensors Call(Tensors inputs, Tensors state = null, bool? training = false, IOptionalArgs? optional_args = null)
+        protected override Tensors Call(Tensors inputs, Tensors state = null, bool? training = null, IOptionalArgs? optional_args = null)
         {
-            var embedding = token_emb.Apply(inputs, state, training ?? false, optional_args);
-            var positions = pos_emb.Apply(positions_base, state, training ?? false, optional_args);
+            var embedding = token_emb.Apply(inputs, state, training, optional_args);
+            var maxlen = inputs.shape[-1];
+            var position_ids = tf.range(start: 0, limit: maxlen, delta: 1);
+            var positions = tf.gather(position_embeddings.AsTensor(), indices: position_ids);
             return (Tensor)embedding + (Tensor)positions;
-        }
-
-        public Tensors ComputeMask(Tensors inputs, Tensor? mask = null)
-        {
-            mask = mask ?? new Tensors(0);
-            return math_ops.not_equal(inputs, mask);
         }
     }
 }

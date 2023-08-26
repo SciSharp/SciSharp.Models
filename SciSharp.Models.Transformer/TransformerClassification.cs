@@ -44,13 +44,13 @@ namespace Tensorflow.Keras.Layers
         }
         protected override Tensors Call(Tensors inputs, Tensors state = null, bool? training = null, IOptionalArgs? optional_args = null)
         {
-            var embeddings = embedding_layer.Apply(inputs);
-            var outputs = transformer_block.Apply(embeddings);
-            outputs = pooling.Apply(outputs);
-            outputs = dropout1.Apply(outputs);
-            outputs = dense.Apply(outputs);
-            outputs = dropout2.Apply(outputs);
-            outputs = output.Apply(outputs);
+            var embeddings = embedding_layer.Apply(inputs, state, training, optional_args);
+            var outputs = transformer_block.Apply(embeddings, state, training, optional_args);
+            outputs = pooling.Apply(outputs, state, training, optional_args);
+            outputs = dropout1.Apply(outputs, state, training, optional_args);
+            outputs = dense.Apply(outputs, state, training, optional_args);
+            outputs = dropout2.Apply(outputs, state, training, optional_args);
+            outputs = output.Apply(outputs, state, training, optional_args);
             return outputs;
         }
         public static IModel Build(TransformerClassificationConfig cfg)
@@ -62,6 +62,7 @@ namespace Tensorflow.Keras.Layers
                     Maxlen = cfg.DatasetCfg.maxlen,
                     VocabSize = cfg.DatasetCfg.vocab_size,
                     EmbedDim = cfg.ModelCfg.embed_dim,
+                    NumHeads = cfg.ModelCfg.num_heads,
                     FfDim = cfg.ModelCfg.ff_dim,
                     DropoutRate = cfg.ModelCfg.dropout_rate,
                     DenseDim = cfg.ModelCfg.dense_dim
@@ -69,7 +70,7 @@ namespace Tensorflow.Keras.Layers
             var outputs = transformer.Apply(inputs);
             return keras.Model(inputs: inputs, outputs: outputs);
         }
-        public static IModel Train(TransformerClassificationConfig? cfg)
+        public static IModel Train(TransformerClassificationConfig? cfg = null)
         {
             cfg = cfg ?? new TransformerClassificationConfig();
             var dataloader = new IMDbDataset(cfg); //the dataset is initially downloaded at TEMP dir, e.g., C:\Users\{user name}\AppData\Local\Temp\imdb\imdb.npz
@@ -84,13 +85,16 @@ namespace Tensorflow.Keras.Layers
             model.fit((NDArray)x_train, (NDArray)y_train, batch_size: cfg.TrainCfg.batch_size, epochs: cfg.TrainCfg.epochs, validation_data: ((NDArray val_x, NDArray val_y))(x_val, y_val));
             return model;
         }
-        public static void Save(IModel model,  string path)
+        public static void Save(IModel model, string path)
         {
-            model.save(path, save_format: "tf");
+            model.save_weights(path + @"\weights.h5");
         }
-        public static IModel Load(string path)
+        public static IModel Load(string path, TransformerClassificationConfig? cfg = null)
         {
-            return tf.keras.models.load_model(path);
+            cfg = cfg ?? new TransformerClassificationConfig();
+            var model = Build(cfg);
+            model.load_weights(path + @"\weights.h5");
+            return model;
         }
         public static Tensors Predict(IModel model, Tensors inputs)
         {

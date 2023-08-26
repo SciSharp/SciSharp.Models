@@ -43,7 +43,7 @@ namespace SciSharp.Models.Transformer
         {
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string projectRootDirectory = GetProjectRootDirectory(currentDirectory);
-            string dataPath = projectRootDirectory + "\\SciSharp.Models.Transformer\\data";
+            string dataPath = projectRootDirectory + @"\SciSharp.Models.Transformer\data";
 
             var dataset = keras.datasets.imdb.load_data(path: cfg.DatasetCfg.path ?? dataPath, maxlen: cfg.DatasetCfg.maxlen);
             var x_train = dataset.Train.Item1.astype(np.float32);
