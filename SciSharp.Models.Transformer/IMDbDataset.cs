@@ -29,30 +29,40 @@ namespace SciSharp.Models.Transformer
             cfg.DatasetCfg.vocab_size = vocab_size;
             cfg.DatasetCfg.maxlen = maxlen;
         }
-        static string GetProjectRootDirectory(string currentDirectory)
-        {
-            DirectoryInfo directory = new DirectoryInfo(currentDirectory);
-            while (directory != null && !directory.GetFiles("*.sln").Any())
-            {
-                directory = directory.Parent;
-            }
-            return directory?.FullName;
-        }
 
         public Tensor[] GetData()
         {
-            string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string projectRootDirectory = GetProjectRootDirectory(currentDirectory);
-            string dataPath = projectRootDirectory + @"\SciSharp.Models.Transformer\data";
+            var dataset = keras.datasets.imdb.load_data(num_words: cfg.DatasetCfg.vocab_size);
+            var x_train = dataset.Train.Item1;
+            var y_train = dataset.Train.Item2;
+            var x_val = dataset.Test.Item1;
+            var y_val = dataset.Test.Item2;
 
-            var dataset = keras.datasets.imdb.load_data(path: cfg.DatasetCfg.path ?? dataPath, maxlen: cfg.DatasetCfg.maxlen);
-            var x_train = dataset.Train.Item1.astype(np.float32);
-            var y_train = dataset.Train.Item2.astype(np.float32);
-            var x_val = dataset.Test.Item1.astype(np.float32);
-            var y_val = dataset.Test.Item2.astype(np.float32);
-            print(len(x_train) + "Training sequences");
-            print(len(x_val) + "Validation sequences");
-            return new[] { x_train, y_train, x_val, y_val };
+            x_train = keras.preprocessing.sequence.pad_sequences(RemoveZeros(x_train), maxlen: cfg.DatasetCfg.maxlen);
+            x_val = keras.preprocessing.sequence.pad_sequences(RemoveZeros(x_val), maxlen: cfg.DatasetCfg.maxlen);
+            print(len(x_train) + " Training sequences");
+            print(len(x_val) + " Validation sequences");
+
+            return new[] { x_train.astype(np.float32), y_train.astype(np.float32), x_val.astype(np.float32), y_val.astype(np.float32) };
+        }
+
+        IEnumerable<int[]> RemoveZeros(NDArray data)
+        {
+            var data_array = (int[,])data.ToMultiDimArray<int>();
+            List<int[]> new_data = new List<int[]>();
+            for (var i = 0; i < data_array.GetLength(0); i++)
+            {
+                List<int> new_array = new List<int>();
+                for (var j = 0; j < data_array.GetLength(1); j++)
+                {
+                    if (data_array[i, j] == 0)
+                        break;
+                    else
+                        new_array.Add(data_array[i, j]);
+                }
+                new_data.Add(new_array.ToArray());
+            }
+            return new_data;
         }
     }
 }
