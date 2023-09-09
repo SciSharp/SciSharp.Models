@@ -19,8 +19,8 @@ namespace Models.Run
             {
             });
 
-            /*var model = transformer.Train();
-            transformer.Save(model, "");*/
+            var model = transformer.Train();
+            transformer.Save(model, "");
             var model = transformer.Load("");
             transformer.Evaluate(model);
 
