@@ -1,5 +1,4 @@
-﻿using SciSharp.Models.Transformer;
-using System;
+﻿using System;
 using System.Diagnostics;
 using Tensorflow.Keras.ArgsDefinition;
 using Tensorflow.Keras.Layers;
@@ -21,7 +20,7 @@ namespace Models.Run
 
             var model = transformer.Train();
             transformer.Save(model, "");
-            var model = transformer.Load("");
+            model = transformer.Load("");
             transformer.Evaluate(model);
 
             stopwatch.Stop();

@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
-    <Version>0.3.0</Version>
-    <LangVersion>10.0</LangVersion>
+    <TargetFrameworks>$(TargetFrameworks)</TargetFrameworks>
+    <Version>$(SciSharpModelVersion)</Version>
+    <LangVersion>$(LangVersion)</LangVersion>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 

@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
-    <Version>0.4.2</Version>
-	<LangVersion>10.0</LangVersion>
+    <TargetFrameworks>$(TargetFrameworks)</TargetFrameworks>
+    <Version>$(SciSharpModelVersion)</Version>
+	<LangVersion>$(LangVersion)</LangVersion>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
@@ -20,9 +20,13 @@
   <ItemGroup>
     <PackageReference Include="Pandas.NET" Version="0.5.1" />
   </ItemGroup>
-
+	
   <ItemGroup>
-    <ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
+	<ProjectReference Include="..\SciSharp.Models.Core\SciSharp.Models.Core.csproj" />
+  </ItemGroup>
+	
+  <ItemGroup Condition="$(SolutionName)==ModelsDebug Or $(SolutionName)==Debugging">
+    <ProjectReference Include="..\..\Pandas.NET\src\Pandas.NET\Pandas.NET.csproj" />
   </ItemGroup>
 
 </Project>

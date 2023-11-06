@@ -69,7 +69,7 @@ namespace SciSharp.Models.ObjectDetection
         {
             string _root;
 
-            public int BATCH_SIZE = 1;
+            public int BATCH_SIZE = 3;
             public int[] INPUT_SIZE = new int[] { 416, 416, 3 };
             public bool DATA_AUG = false;
             public bool WRITE_IMAGE = true;

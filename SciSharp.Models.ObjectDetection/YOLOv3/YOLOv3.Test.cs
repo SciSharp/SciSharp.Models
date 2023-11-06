@@ -15,15 +15,16 @@ namespace SciSharp.Models.ObjectDetection
     {
         public ModelTestResult Test(TestingOptions options)
         {
-            var input_layer = keras.layers.Input(cfg.TEST.INPUT_SIZE, cfg.TEST.BATCH_SIZE);
+            var input_layer = keras.layers.Input(cfg.TEST.INPUT_SIZE);
             var feature_maps = yolo.Apply(input_layer);
 
-            var bbox_tensors = new Tensors();
+            var tensors = new List<Tensor>();
             foreach (var (i, fm) in enumerate(feature_maps))
             {
                 var bbox_tensor = yolo.Decode(fm, i);
-                bbox_tensors.Add(bbox_tensor);
+                tensors.Add(bbox_tensor);
             }
+            var bbox_tensors = new Tensors(tensors);
             var model = tf.keras.Model(input_layer, bbox_tensors);
 
             model.load_weights("./YOLOv3/yolov3.h5");

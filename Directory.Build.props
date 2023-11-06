@@ -1,0 +1,12 @@
+<Project>
+ <PropertyGroup>
+   <LangVersion>10.0</LangVersion>
+   <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0</TargetFrameworks>
+   <OutputPath>..\packages</OutputPath>
+   <TensorFlowRedistVersion>2.16.0</TensorFlowRedistVersion>
+   <TensorFlowVersion>0.150.0</TensorFlowVersion>
+   <KerasVersion>0.15.0</KerasVersion>
+   <SciSharpModelVersion>0.9.0</SciSharpModelVersion>
+   <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+ </PropertyGroup>
+</Project>

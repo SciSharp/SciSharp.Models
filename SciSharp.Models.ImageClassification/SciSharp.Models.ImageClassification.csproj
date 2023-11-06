@@ -1,10 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+	<TargetFrameworks>$(TargetFrameworks)</TargetFrameworks>
     <Nullable>enable</Nullable>
-    <Version>0.6.1</Version>
-    <LangVersion>10.0</LangVersion>
+    <Version>$(SciSharpModelVersion)</Version>
+	<GeneratePackageOnBuild>$(GeneratePackageOnBuild)</GeneratePackageOnBuild>
+    <LangVersion>$(LangVersion)</LangVersion>
     <Authors>Haiping Chen</Authors>
     <Company>SciSharp STACK</Company>
     <PackageReleaseNotes>1. Image classification (Transfer Learning)
