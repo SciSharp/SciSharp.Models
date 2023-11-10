@@ -11,7 +11,6 @@ using Tensorflow.Keras.Engine;
 using static Tensorflow.Binding;
 using static Tensorflow.KerasApi;
 using Tensorflow.NumPy;
-using SciSharp.Models.Utils;
 using SciSharp.Models.ImageClassification.Zoo;
 using System.Data;
 
