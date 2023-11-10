@@ -5,11 +5,12 @@
     <TargetFramework>net6.0</TargetFramework>
     <Platforms>AnyCPU;x64</Platforms>
     <LangVersion>11.0</LangVersion>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.4.0.20200915" />
-    <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.11.4" />
+    <PackageReference Include="SciSharp.TensorFlow.Redist" Version="$(TensorFlowRedistVersion)" />
   </ItemGroup>
 
   <ItemGroup>

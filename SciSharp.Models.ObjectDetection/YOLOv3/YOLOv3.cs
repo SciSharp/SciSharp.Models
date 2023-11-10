@@ -104,12 +104,12 @@ namespace SciSharp.Models.ObjectDetection
 
         public Tensor Decode(Tensor conv_output, int i = 0)
         {
-            var conv_shape = tf.shape(conv_output);
+            KerasTensor conv_shape = tf.shape(conv_output);
             var batch_size = conv_shape[0];
             var output_size = conv_shape[1];
-
+            
             conv_output = tf.reshape(conv_output, new object[] { batch_size, output_size, output_size, 3, 5 + num_class });
-
+            
             var conv_raw_dxdy = conv_output[":", ":", ":", ":", "0:2"];
             var conv_raw_dwdh = conv_output[":", ":", ":", ":", "2:4"];
             var conv_raw_conf = conv_output[":", ":", ":", ":", "4:5"];
@@ -258,19 +258,20 @@ namespace SciSharp.Models.ObjectDetection
 
         public void Train(TrainingOptions options)
         {
-            // tf.debugging.set_log_device_placement(true);
-            // tf.Context.Config.GpuOptions.AllowGrowth = true;
+            tf.debugging.set_log_device_placement(true);
+            tf.Context.Config.GpuOptions.AllowGrowth = true;
 
-            var input_layer = keras.layers.Input(cfg.TRAIN.INPUT_SIZE, cfg.TRAIN.BATCH_SIZE);
+            var input_layer = keras.layers.Input(cfg.TRAIN.INPUT_SIZE);
             var conv_tensors = yolo.Apply(input_layer);
 
-            var output_tensors = new Tensors();
+            var tensors = new List<Tensor>();
             foreach (var (i, conv_tensor) in enumerate(conv_tensors))
             {
                 var pred_tensor = yolo.Decode(conv_tensor, i);
-                output_tensors.Add(conv_tensor);
-                output_tensors.Add(pred_tensor);
+                tensors.Add(conv_tensor);
+                tensors.Add(pred_tensor);
             }
+            var output_tensors = new Tensors(tensors);
 
             var model = keras.Model(input_layer, output_tensors);
             model.summary();

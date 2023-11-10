@@ -1,5 +1,4 @@
-﻿using SciSharp.Models.TextClassification;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,7 +15,6 @@ namespace Models.Run
         public void Run()
         {
             PrepareData();
-            var classifier = new BinaryTextClassifier();
         }
 
         public void PrepareData()

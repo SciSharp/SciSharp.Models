@@ -13,4 +13,4 @@ __pycache__
 /SciSharp.Models.ObjectDetection/YOLOv3/python/mAP
 /SciSharp.Models.ObjectDetection/YOLOv3/data
 /SciSharp.Models.Transformer/data/*.txt
-
+packages

@@ -1,30 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
-    <LangVersion>10.0</LangVersion>
+    <TargetFrameworks>$(TargetFrameworks)</TargetFrameworks>
+    <LangVersion>$(LangVersion)</LangVersion>
     <RootNamespace>SciSharp.Models</RootNamespace>
-    <Version>0.7.1</Version>
+    <Version>$(SciSharpModelVersion)</Version>
+	<GeneratePackageOnBuild>$(GeneratePackageOnBuild)</GeneratePackageOnBuild>
     <Authors>Haiping Chen</Authors>
     <Company>SciSharp STACK</Company>
-    <AssemblyVersion>0.7.1.0</AssemblyVersion>
     <PackageReleaseNotes>
 		1. Image classification
 		2. Time series
+		3. Transfomer
+		4. BERT
 	</PackageReleaseNotes>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <Optimize>True</Optimize>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <Optimize>False</Optimize>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="TensorFlow.Keras" Version="0.15.0" />
+    <PackageReference Include="TensorFlow.Keras" Version="$(KerasVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(SolutionName)==ModelsDebug Or $(SolutionName)==Debugging">
+    <ProjectReference Include="..\..\TensorFlow.NET\src\TensorFlowNET.Keras\Tensorflow.Keras.csproj" />
   </ItemGroup>
 
 </Project>
