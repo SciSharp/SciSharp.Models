@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SciSharp.Models.ImageClassification\SciSharp.Models.ImageClassification.csproj" />
     <ProjectReference Include="..\SciSharp.Models.ObjectDetection\SciSharp.Models.ObjectDetection.csproj" />
     <ProjectReference Include="..\SciSharp.Models.TextClassification\SciSharp.Models.TextClassification.csproj" />
     <ProjectReference Include="..\SciSharp.Models.TimeSeries\SciSharp.Models.TimeSeries.csproj" />
